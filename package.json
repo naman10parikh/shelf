@@ -1,0 +1,65 @@
+{
+  "name": "shelf",
+  "version": "0.1.0",
+  "description": "shelf — the Energy fleet's object-storage / file-handling / CDN / uploads employee. Presigned POST > PUT, magic-byte validation, abort-incomplete-multipart day-one, egress-first cost. Powered by Energy.",
+  "type": "module",
+  "bin": {
+    "shelf": "./dist/index.js",
+    "shelf-mcp": "./dist/mcp/server.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/",
+    "skills/",
+    "brain/",
+    "eval/fixtures/",
+    "README.md",
+    "AGENTS.md",
+    "llms.txt",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:acceptance": "vitest run eval/acceptance/form1-minio.test.ts",
+    "eval": "node dist/index.js eval",
+    "mcp": "node dist/mcp/server.js",
+    "rsi": "node workflows/rsi.workflow.js --deterministic",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "agent",
+    "object-storage",
+    "s3",
+    "r2",
+    "presigned-url",
+    "cdn",
+    "uploads",
+    "file-validation",
+    "dev-tools",
+    "energy"
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.726.1",
+    "@aws-sdk/s3-presigned-post": "3.726.1",
+    "@aws-sdk/s3-request-presigner": "3.726.1",
+    "chalk": "5.4.1",
+    "commander": "12.1.0",
+    "file-type": "19.6.0",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.5",
+    "typescript": "5.7.3",
+    "vitest": "2.1.8"
+  }
+}

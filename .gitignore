@@ -24,3 +24,6 @@ packages/web/.next/
 vault/Untitled*.base
 
 .env
+
+# Build output (shelf CLI/MCP) — never commit compiled artifacts
+dist/
