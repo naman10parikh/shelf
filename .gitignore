@@ -19,6 +19,7 @@ packages/web/.next/
 .claude/vp-signals/*.done
 .claude/vp-signals/*.needs-qa
 .claude/vp-signals/*.migrating
+.claude/hook-block.log
 
 # Obsidian temp files
 vault/Untitled*.base
