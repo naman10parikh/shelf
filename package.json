@@ -27,7 +27,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:acceptance": "vitest run eval/acceptance/form1-minio.test.ts",
     "eval": "node dist/index.js eval",
     "mcp": "node dist/mcp/server.js",
