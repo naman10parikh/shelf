@@ -1,0 +1,22 @@
+{
+  "id": "GT-2",
+  "scenario": "S4",
+  "title": "Stored XSS via a fake PNG (.html renamed .png)",
+  "level": ["L2"],
+  "ciBlocking": true,
+  "evalCheck": "Must fix BOTH write-side (magic-byte validate) AND read-side (forced Content-Type + attachment + nosniff). An answer that only validates on upload is incorrect — the bug is two-sided.",
+  "checks": [
+    {
+      "name": "L2 write-side: validate rejects an .html-as-.png by magic bytes",
+      "command": ["validate", "eval/fixtures/fake.png"],
+      "expectExit": "nonzero",
+      "mustContain": ["HTML"]
+    },
+    {
+      "name": "L2 read-side: serve-config forces type + attachment + nosniff (two-sided)",
+      "command": ["serve-config", "--bucket", "X", "--json"],
+      "expectExit": 0,
+      "mustContain": ["nosniff", "attachment", "Content-Type"]
+    }
+  ]
+}

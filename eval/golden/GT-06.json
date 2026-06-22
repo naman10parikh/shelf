@@ -1,0 +1,22 @@
+{
+  "id": "GT-6",
+  "scenario": "S11",
+  "title": "Invisible orphaned-multipart storage bill",
+  "level": ["L1", "L2"],
+  "ciBlocking": true,
+  "evalCheck": "Must (a) name orphaned multiparts as the invisible cost, (b) prescribe the abort-incomplete-multipart lifecycle rule, (c) ideally name the discovery command.",
+  "checks": [
+    {
+      "name": "L1: both lifecycle surfaces exist (set installs the rule; orphans finds them)",
+      "command": ["lifecycle", "--help"],
+      "expectExit": 0,
+      "mustContain": ["set", "orphans"]
+    },
+    {
+      "name": "L2: explain S11 names orphaned multiparts + the abort-incomplete-multipart rule + the discovery command",
+      "command": ["explain", "S11"],
+      "expectExit": 0,
+      "mustContain": ["orphaned multipart", "abort incomplete multipart", "list-multipart-uploads"]
+    }
+  ]
+}

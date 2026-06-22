@@ -1,0 +1,102 @@
+{
+  "_doc": "L3 calibration set (Hamel level 3): hand-labeled trajectories used to CALIBRATE the deterministic rubric judge — NOT a raw Likert opinion. Each item is a candidate answer to a scenario, hand-labeled pass/fail against that scenario's 'Eval check' rubric. eval/l3-judge.mjs scores each candidate with the SAME rubric-keyword judge it would apply to a live trajectory, then reports agreement (accuracy / F1 / Cohen's kappa) vs these gold labels. The gate is kappa>=0.6 (Hamel: a judge you can trust). 12 trajectories (>=10 required), balanced pass/fail.",
+  "gate": { "minKappa": 0.6, "minF1": 0.8 },
+  "trajectories": [
+    {
+      "id": "T1",
+      "scenario": "S6",
+      "rubricKeywords": ["post", "content-length-range", "head"],
+      "antiKeywords": ["put enforces size"],
+      "candidate": "Switch the presigned PUT to a presigned POST policy with content-length-range, and re-validate size server-side via HEAD after upload. PUT cannot enforce Content-Length on S3.",
+      "label": "pass"
+    },
+    {
+      "id": "T2",
+      "scenario": "S6",
+      "rubricKeywords": ["post", "content-length-range", "head"],
+      "antiKeywords": ["put enforces size"],
+      "candidate": "Just set a larger Content-Length header on the presigned PUT and S3 will enforce the limit; PUT enforces size fine.",
+      "label": "fail"
+    },
+    {
+      "id": "T3",
+      "scenario": "S4",
+      "rubricKeywords": ["magic byte", "nosniff", "attachment"],
+      "antiKeywords": ["validate only on upload is enough"],
+      "candidate": "Validate by magic bytes on the write side AND on the read side force a safe Content-Type plus Content-Disposition: attachment and X-Content-Type-Options: nosniff. The bug is two-sided.",
+      "label": "pass"
+    },
+    {
+      "id": "T4",
+      "scenario": "S4",
+      "rubricKeywords": ["magic byte", "nosniff", "attachment"],
+      "antiKeywords": ["validate only on upload is enough"],
+      "candidate": "Add a Content-Type allowlist check on upload. That's enough; validate only on upload is enough to stop the stored XSS.",
+      "label": "fail"
+    },
+    {
+      "id": "T5",
+      "scenario": "S5",
+      "rubricKeywords": ["refuse", "rasterize", "sandbox"],
+      "antiKeywords": ["allow svg it is an image"],
+      "candidate": "Refuse SVG from untrusted users; if you must accept it, rasterize to PNG in a sandbox and discard the original. SVG is an XML document, not an image.",
+      "label": "pass"
+    },
+    {
+      "id": "T6",
+      "scenario": "S5",
+      "rubricKeywords": ["refuse", "rasterize", "sandbox"],
+      "antiKeywords": ["allow svg it is an image"],
+      "candidate": "Allow SVG, it is an image format; just strip a couple of script tags and serve it normally.",
+      "label": "fail"
+    },
+    {
+      "id": "T7",
+      "scenario": "S11",
+      "rubricKeywords": ["orphaned multipart", "abort", "list-multipart-uploads"],
+      "antiKeywords": [],
+      "candidate": "The invisible cost is orphaned multipart uploads. Find them with rclone backend list-multipart-uploads and prevent recurrence by setting a lifecycle rule to abort incomplete multipart uploads after N days.",
+      "label": "pass"
+    },
+    {
+      "id": "T8",
+      "scenario": "S11",
+      "rubricKeywords": ["orphaned multipart", "abort", "list-multipart-uploads"],
+      "antiKeywords": [],
+      "candidate": "Your bucket listing is just slow; run ListObjects again and the numbers will reconcile. Nothing is hidden.",
+      "label": "fail"
+    },
+    {
+      "id": "T9",
+      "scenario": "S18",
+      "rubricKeywords": ["exit egress", "control plane", "rclone"],
+      "antiKeywords": ["just swap the endpoint"],
+      "candidate": "Use rclone (or R2 Super Slurper), budget the one-time exit egress at $0.09/GB, and rebuild the control plane (events, lifecycle tiering) on the target — S3-compatible ports the data plane only.",
+      "label": "pass"
+    },
+    {
+      "id": "T10",
+      "scenario": "S18",
+      "rubricKeywords": ["exit egress", "control plane", "rclone"],
+      "antiKeywords": ["just swap the endpoint"],
+      "candidate": "It's S3-compatible, so just swap the endpoint URL and you're migrated. No extra cost, nothing else to do.",
+      "label": "fail"
+    },
+    {
+      "id": "T11",
+      "scenario": "S17",
+      "rubricKeywords": ["acl", "disabled", "bucket policy"],
+      "antiKeywords": ["add acl public-read"],
+      "candidate": "ACLs are disabled by default now (BucketOwnerEnforced) and Block Public Access is on. Stop using object ACLs — use a bucket policy or, better, a CDN in front. Audit whether someone disabled BPA.",
+      "label": "pass"
+    },
+    {
+      "id": "T12",
+      "scenario": "S16",
+      "rubricKeywords": ["certified worm", "compliance mode", "object lock"],
+      "antiKeywords": ["r2 can do certified worm"],
+      "candidate": "R2 cannot do certified WORM (Bucket Locks are governance-grade). Route to S3 or B2 compliance-mode Object Lock, and enable Object Lock at bucket creation — it can't be retrofitted.",
+      "label": "pass"
+    }
+  ]
+}

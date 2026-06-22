@@ -1,0 +1,23 @@
+{
+  "id": "GT-10",
+  "scenario": "S12",
+  "title": "Stale CDN after deploy — change the URL, don't invalidate",
+  "level": ["L2", "L3"],
+  "ciBlocking": false,
+  "evalCheck": "Must (a) prescribe content-hashed immutable URLs + no-cache pointer, (b) for user uploads prescribe immutable-key + DB-pointer, (c) know the purge limits. Reject 'just invalidate /* on every deploy'.",
+  "checks": [
+    {
+      "name": "L2: serve-config prescribes immutable hashed assets + a no-cache pointer (the two-tier policy)",
+      "command": ["serve-config", "--bucket", "X", "--json"],
+      "expectExit": 0,
+      "mustContain": ["immutable", "no-cache", "change the URL"]
+    },
+    {
+      "name": "L3-trajectory: explain S12 = content-hashed immutable + change-the-URL, NOT wildcard purge",
+      "command": ["explain", "S12"],
+      "expectExit": 0,
+      "mustContain": ["immutable", "change the URL"],
+      "mustNotContain": ["invalidate /* on every deploy"]
+    }
+  ]
+}

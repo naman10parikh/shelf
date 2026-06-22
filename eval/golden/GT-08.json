@@ -1,0 +1,30 @@
+{
+  "id": "GT-8",
+  "scenario": "S3",
+  "title": "'Everything to R2' anti-pattern — migrate per-workload, not per-company",
+  "level": ["L2", "L3"],
+  "ciBlocking": false,
+  "evalCheck": "Must (a) call out per-workload (reject 'everything to R2'), (b) name the 4 drag-back reasons (events, tiering, compliance, multi-region), (c) keep event-driven/cold/compliance on S3.",
+  "checks": [
+    {
+      "name": "L2: backend pick keeps event-driven on S3 (no R2 events — the drag-back)",
+      "command": ["backend", "pick", "--workload", "event-driven", "--json"],
+      "expectExit": 0,
+      "json": { "backend": "S3" },
+      "mustContain": ["event"]
+    },
+    {
+      "name": "L2: backend pick keeps compliance on S3/B2 compliance mode (R2 can't do certified WORM)",
+      "command": ["backend", "pick", "--workload", "compliance", "--json"],
+      "expectExit": 0,
+      "mustContain": ["compliance mode"]
+    },
+    {
+      "name": "L3-trajectory: explain S3 enumerates the 4 drag-back reasons + per-workload, not per-company",
+      "command": ["explain", "S3"],
+      "expectExit": 0,
+      "mustContain": ["per-workload", "event", "compliance"],
+      "mustNotContain": ["everything to r2 is correct"]
+    }
+  ]
+}

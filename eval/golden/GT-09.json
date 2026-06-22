@@ -1,0 +1,28 @@
+{
+  "id": "GT-9",
+  "scenario": "S15",
+  "title": "Zip-bomb / pixel-flood DoS — validate resource consumption, not just type",
+  "level": ["L2"],
+  "ciBlocking": false,
+  "evalCheck": "Must validate resource consumption (decompressed size, ratio, pixel dims, time), not just type. Reject answers that only check content-type/extension.",
+  "checks": [
+    {
+      "name": "L2: validate caps total pixels (pixel-flood DoS) below a low ceiling",
+      "command": ["validate", "eval/fixtures/hello.png", "--max-pixels", "0"],
+      "expectExit": "nonzero",
+      "mustContain": ["pixel"]
+    },
+    {
+      "name": "L2: validate caps raw byte size (the first resource-consumption gate)",
+      "command": ["validate", "eval/fixtures/hello.png", "--max-bytes", "1"],
+      "expectExit": "nonzero",
+      "mustContain": ["size"]
+    },
+    {
+      "name": "L2: explain S15 prescribes resource-consumption caps (ratio + pixel + decompress), not type-only",
+      "command": ["explain", "S15"],
+      "expectExit": 0,
+      "mustContain": ["compression ratio", "pixel"]
+    }
+  ]
+}

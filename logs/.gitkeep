@@ -1,0 +1,1 @@
+# Keep the logs/ dir in git; the append-only run log itself is a runtime artifact (gitignored).

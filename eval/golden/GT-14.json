@@ -1,0 +1,22 @@
+{
+  "id": "GT-14",
+  "scenario": "S10",
+  "title": "Large upload won't resume after sleep — reach for tus, not 'just retry'",
+  "level": ["L2", "L3"],
+  "ciBlocking": false,
+  "evalCheck": "Must (a) explain multipart != resumable-by-default, (b) reach for tus for resume-after-sleep, (c) verify part reuse. Reject 'just retry the multipart upload'.",
+  "checks": [
+    {
+      "name": "L3-trajectory: explain S10 = multipart isn't resumable-by-default + reach for tus + persist UploadId/ETags (and flags 'just retry' as the wrong answer)",
+      "command": ["explain", "S10"],
+      "expectExit": 0,
+      "mustContain": ["tus", "UploadId", "resumable"]
+    },
+    {
+      "name": "L2: explain S9 prescribes testing on Safari/iOS (the worst browser) + CORS preflight",
+      "command": ["explain", "S9"],
+      "expectExit": 0,
+      "mustContain": ["Safari", "CORS"]
+    }
+  ]
+}

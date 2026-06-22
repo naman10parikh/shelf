@@ -1,0 +1,22 @@
+{
+  "id": "GT-7",
+  "scenario": "S1",
+  "title": "Egress cost blowup — size the bill egress-first, lead with the mechanism",
+  "level": ["L2"],
+  "ciBlocking": false,
+  "evalCheck": "Answer must (a) name egress (not storage) as the cause, (b) prescribe CDN-in-front and/or R2 for hot/public, (c) move the alert to egress. The number is directional (O-28); lead with the mechanism, label the figure 'verify'.",
+  "checks": [
+    {
+      "name": "L2: cost estimate is egress-first and labels the number directional (O-28)",
+      "command": ["cost", "estimate", "--egress-gb", "10", "--storage-gb", "100", "--json"],
+      "expectExit": 0,
+      "mustContain": ["egress", "directional"]
+    },
+    {
+      "name": "L2: explain S1 names egress (not storage) + CDN/R2 in front + egress alerting",
+      "command": ["explain", "S1"],
+      "expectExit": 0,
+      "mustContain": ["egress", "CDN"]
+    }
+  ]
+}

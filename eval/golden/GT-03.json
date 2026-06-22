@@ -1,0 +1,22 @@
+{
+  "id": "GT-3",
+  "scenario": "S5",
+  "title": "SVG SSRF/XSS — server fetches 169.254.169.254",
+  "level": ["L2"],
+  "ciBlocking": true,
+  "evalCheck": "Must treat SVG as a document (not 'just sanitize it lightly'); preferred answer is refuse-or-rasterize-in-sandbox. Reject 'allow SVG, it's an image format'.",
+  "checks": [
+    {
+      "name": "L2: validate REFUSES SVG from untrusted input (XML doc → XSS + SSRF)",
+      "command": ["validate", "eval/fixtures/evil.svg"],
+      "expectExit": "nonzero",
+      "mustContain": ["SVG"]
+    },
+    {
+      "name": "L2: explain P-09 teaches refuse-or-rasterize-in-sandbox (never raw render)",
+      "command": ["explain", "P-09"],
+      "expectExit": 0,
+      "mustContain": ["SVG"]
+    }
+  ]
+}

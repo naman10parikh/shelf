@@ -28,3 +28,6 @@ vault/Untitled*.base
 
 # Build output (shelf CLI/MCP) — never commit compiled artifacts
 dist/
+
+# Observability run log — runtime artifact (append-only, churns every run); dir kept via logs/.gitkeep
+logs/runs.jsonl

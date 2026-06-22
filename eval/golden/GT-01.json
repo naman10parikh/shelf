@@ -1,0 +1,32 @@
+{
+  "id": "GT-1",
+  "scenario": "S6",
+  "title": "1MB limit, 5GB uploaded — presigned PUT can't bound size",
+  "level": ["L1", "L2"],
+  "ciBlocking": true,
+  "evalCheck": "Must (a) explain PUT can't enforce size, (b) switch to POST policy with content-length-range, (c) add server-side HEAD re-validation, (d) ideally flag the boto3 bug to verify in test.",
+  "checks": [
+    {
+      "name": "L2: presign upload defaults to a POST policy with content-length-range (S6 fix)",
+      "command": ["presign", "upload", "--bucket", "X", "--key", "Y", "--max-bytes", "1048576", "--json"],
+      "env": { "S3_ENDPOINT": "http://localhost:9000", "S3_ACCESS_KEY_ID": "x", "S3_SECRET_ACCESS_KEY": "x" },
+      "expectExit": 0,
+      "json": { "method": "POST" },
+      "mustContain": ["content-length-range", "HEAD"]
+    },
+    {
+      "name": "L2: presign upload --put warns it CANNOT bound size (P-01)",
+      "command": ["presign", "upload", "--bucket", "X", "--key", "Y", "--put", "--json"],
+      "env": { "S3_ENDPOINT": "http://localhost:9000", "S3_ACCESS_KEY_ID": "x", "S3_SECRET_ACCESS_KEY": "x" },
+      "expectExit": 0,
+      "json": { "method": "PUT" },
+      "mustContain": ["CANNOT ENFORCE SIZE"]
+    },
+    {
+      "name": "L2: explain S6 teaches POST-policy + HEAD re-validation",
+      "command": ["explain", "S6"],
+      "expectExit": 0,
+      "mustContain": ["POST", "content-length-range", "HEAD"]
+    }
+  ]
+}

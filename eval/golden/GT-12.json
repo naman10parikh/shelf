@@ -1,0 +1,23 @@
+{
+  "id": "GT-12",
+  "scenario": "S18",
+  "title": "S3→R2 migration — budget exit egress, flag the control-plane that won't port",
+  "level": ["L3"],
+  "ciBlocking": false,
+  "evalCheck": "Must (a) name the right tool (Super Slurper / rclone), (b) budget exit egress, (c) flag that control-plane features don't port. Reject 'it's S3-compatible so just swap the endpoint' without the control-plane caveat.",
+  "checks": [
+    {
+      "name": "L2: migrate plan budgets the one-time exit egress + uses rclone + lists control-plane gaps",
+      "command": ["migrate", "plan", "--from", "s3:a", "--to", "r2:b", "--storage-gb", "1000", "--json"],
+      "expectExit": 0,
+      "json": { "oneTimeExitEgressUsd": 90 },
+      "mustContain": ["rclone", "budget it", "data plane"]
+    },
+    {
+      "name": "L3-trajectory: explain S18 names the tool + exit-egress budget + control-plane-doesn't-port caveat (and explicitly flags the 'just swap the endpoint' anti-pattern as wrong)",
+      "command": ["explain", "S18"],
+      "expectExit": 0,
+      "mustContain": ["exit egress", "control-plane", "super slurper", "rclone"]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "GT-5",
+  "scenario": "S7",
+  "title": "SignatureDoesNotMatch misdiagnosed as a CORS bug",
+  "level": ["L2"],
+  "ciBlocking": false,
+  "evalCheck": "Must (a) identify it as signature drift, not CORS, (b) prescribe returning the signed header set or switching to POST policy. Reject 'fix the CORS config' as the primary answer.",
+  "checks": [
+    {
+      "name": "L2: presign PUT returns the EXACT signed-header set + warns about amz-sdk-request drift (S7)",
+      "command": ["presign", "upload", "--bucket", "X", "--key", "Y", "--put", "--json"],
+      "env": { "S3_ENDPOINT": "http://localhost:9000", "S3_ACCESS_KEY_ID": "x", "S3_SECRET_ACCESS_KEY": "x" },
+      "expectExit": 0,
+      "mustContain": ["signedHeaders", "amz-sdk-request", "SignatureDoesNotMatch"]
+    },
+    {
+      "name": "L2: explain S7 diagnoses signature drift, not CORS",
+      "command": ["explain", "S7"],
+      "expectExit": 0,
+      "mustContain": ["signature", "CORS"]
+    }
+  ]
+}

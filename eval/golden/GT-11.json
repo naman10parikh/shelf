@@ -1,0 +1,22 @@
+{
+  "id": "GT-11",
+  "scenario": "S16",
+  "title": "Certified WORM promised on R2 — route to S3/B2 compliance mode",
+  "level": ["L3"],
+  "ciBlocking": false,
+  "evalCheck": "Must (a) state R2 can't do certified WORM, (b) route to S3/B2 compliance mode, (c) note Object Lock is creation-time-only, (d) prefer governance unless compliance is demanded.",
+  "checks": [
+    {
+      "name": "L2: backend pick compliance routes to S3/B2 compliance mode (not R2)",
+      "command": ["backend", "pick", "--workload", "compliance", "--json"],
+      "expectExit": 0,
+      "mustContain": ["compliance mode", "Object Lock"]
+    },
+    {
+      "name": "L3-trajectory: explain S16 = R2 can't do certified WORM + Object Lock creation-time-only",
+      "command": ["explain", "S16"],
+      "expectExit": 0,
+      "mustContain": ["certified WORM", "compliance mode", "Object Lock", "creation"]
+    }
+  ]
+}

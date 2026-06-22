@@ -1,0 +1,32 @@
+{
+  "id": "GT-4",
+  "scenario": "round-trip (the bar)",
+  "title": "Presigned upload + get byte-equal round-trip via signed URL",
+  "level": ["L1", "L2"],
+  "ciBlocking": true,
+  "evalCheck": "shelf upload + shelf get byte-equal round-trip via signed URL (the acceptance bar). The live round-trip runs in the acceptance test (E3 Form 1, MinIO); here L1/L2 assert the round-trip surfaces exist + presign mints a real POST policy with a signed url + fields.",
+  "checks": [
+    {
+      "name": "L1: the round-trip CLI surfaces both exist (upload + get)",
+      "command": ["--help"],
+      "expectExit": 0,
+      "mustContain": ["upload", "get"]
+    },
+    {
+      "name": "L2: presign upload mints a POST policy with a url + signed fields (the upload side of the round-trip)",
+      "command": ["presign", "upload", "--bucket", "shelf-accept", "--key", "test/hello.png", "--json"],
+      "env": { "S3_ENDPOINT": "http://localhost:9000", "S3_ACCESS_KEY_ID": "x", "S3_SECRET_ACCESS_KEY": "x" },
+      "expectExit": 0,
+      "json": { "method": "POST" },
+      "mustContain": ["url", "fields", "http"]
+    },
+    {
+      "name": "L2: presign get mints a signed GET (the read side of the round-trip)",
+      "command": ["presign", "get", "--bucket", "shelf-accept", "--key", "test/hello.png", "--json"],
+      "env": { "S3_ENDPOINT": "http://localhost:9000", "S3_ACCESS_KEY_ID": "x", "S3_SECRET_ACCESS_KEY": "x" },
+      "expectExit": 0,
+      "json": { "method": "GET" },
+      "mustContain": ["http"]
+    }
+  ]
+}

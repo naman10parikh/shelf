@@ -1,0 +1,23 @@
+{
+  "id": "GT-13",
+  "scenario": "S17",
+  "title": "putObject({ACL:'public-read'}) now 400s — ACLs disabled by default",
+  "level": ["L1", "L2"],
+  "ciBlocking": true,
+  "evalCheck": "Must (a) know ACLs are disabled by default + BPA on by default, (b) switch to bucket policy / CDN, (c) reframe the audit as 'was BPA disabled?'. Reject 'add ACL:public-read'.",
+  "checks": [
+    {
+      "name": "L2: explain S17 = ACLs disabled by default + policy/CDN, not object ACLs",
+      "command": ["explain", "S17"],
+      "expectExit": 0,
+      "mustContain": ["ACLs are disabled", "policy-based", "CDN"],
+      "mustNotContain": ["add acl:'public-read'"]
+    },
+    {
+      "name": "L1/L2: explain P-13 documents the ACL:'public-read' throw (the footgun the hook also blocks)",
+      "command": ["explain", "P-13"],
+      "expectExit": 0,
+      "mustContain": ["ACL", "disabled"]
+    }
+  ]
+}
