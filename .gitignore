@@ -31,3 +31,6 @@ dist/
 
 # Observability run log — runtime artifact (append-only, churns every run); dir kept via logs/.gitkeep
 logs/runs.jsonl
+
+# Cockpit audit screenshots — Playwright verification evidence (binary, regenerable); not source
+.audit/
