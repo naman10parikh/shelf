@@ -1,0 +1,117 @@
+name: acceptance
+
+# THE merge gate (PLAN §5, E3): the bar — `shelf upload` (presign POST + HEAD re-validate) +
+# `shelf get` round-trips a file to an S3-compatible bucket with signed-URL access control, while an
+# oversize / wrong-magic-byte / SVG-from-untrusted upload is REJECTED. Form 1 runs against an EPHEMERAL
+# MinIO container (D15 local-first / $0 / no-creds — throwaway minioadmin) and RED-BLOCKS the merge.
+#
+# Form 2 (the E2B Firecracker live-R2 variant, PLAN §5 / §11) is the ADDITIVE, secret-gated, NON-BLOCKING
+# `acceptance-live` job below — it proves the Sandbox component ✅ but never blocks the merge (absent
+# R2_*/E2B_API_KEY it skips honestly → Sandbox component 🟡). See CHAIRMAN-CHECKLIST.
+#
+# Convention note: MinIO's official image needs the `server /data` subcommand, which a GitHub Actions
+# `services:` block cannot pass to the image — so MinIO is started as a STEP via `docker run -d` + a
+# health poll (the exact path verified locally). The acceptance body is identical to `pnpm test:acceptance`.
+
+# push/PR run the merge gate (Form 1); workflow_dispatch additionally enables the live Form-2 job below.
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    # Form-1 env: an explicit S3_ENDPOINT is the signal that makes the MinIO round-trip block RUN (and
+    # red-block) — without it the test honest-skips. Throwaway creds — NEVER a real secret (PLAN §8/D15).
+    env:
+      S3_ENDPOINT: http://localhost:9000
+      S3_ACCESS_KEY_ID: minioadmin
+      S3_SECRET_ACCESS_KEY: minioadmin
+      S3_REGION: us-east-1
+      SHELF_ACCEPT_BUCKET: shelf-accept
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start MinIO (ephemeral, $0, no account — the local-first merge gate, D15)
+        run: |
+          docker run -d --name shelf-minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
+            minio/minio server /data
+          # Poll the health endpoint until MinIO is live (no foreground sleep).
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:9000/minio/health/live >/dev/null 2>&1; then
+              echo "MinIO healthy after ${i}s"; break
+            fi
+            if [ "$i" = "30" ]; then echo "MinIO did not become healthy"; docker logs shelf-minio; exit 1; fi
+            sleep 1
+          done
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile || pnpm install
+
+      - name: Build
+        run: pnpm build
+
+      - name: "Acceptance test — Form 1 (the bar — round-trip + signed-URL 403/200 + oversize/fake/SVG reject)"
+        run: pnpm test:acceptance
+
+      - name: Eval pyramid L1 + L2 (the CI-blocking golden set GT-1/2/3/4/6/13, pass^k)
+        run: |
+          node dist/index.js eval --level 1
+          node dist/index.js eval --level 2
+
+      - name: Tear down MinIO
+        if: ${{ always() }}
+        run: docker rm -f shelf-minio || true
+
+  # ADDITIVE, secret-gated, NON-BLOCKING: the E2B Firecracker live-R2 variant (PLAN §5 Form 2 / §11, E3).
+  # Absent R2_*/E2B_API_KEY this job SKIPS honestly (rc=0) — the `acceptance` job above is the merge gate
+  # (D15). It proves the Sandbox component ✅ (live boot + signed-URL 403/200 + TTL expiry + edge reject).
+  # workflow_dispatch so it only runs on-demand (quota/flake isolation); continue-on-error so it never
+  # red-blocks even if the live provider hiccups.
+  acceptance-live:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    continue-on-error: true
+    env:
+      E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install deps (+ e2b for the live boot)
+        run: |
+          pnpm install --frozen-lockfile || pnpm install
+          pnpm add -D e2b || true
+
+      - name: Build
+        run: pnpm build
+
+      - name: E2B live-R2 acceptance (Form 2 — only with creds; additive, never blocks)
+        run: node eval/acceptance/form2-e2b.mjs
