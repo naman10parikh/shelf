@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "0.1",
+  "name": "shelf",
+  "description": "The Energy fleet's object-storage / file-handling / CDN / uploads employee — mints presigned upload URLs (POST policy, size+type bounded), round-trips files to Cloudflare R2 / S3 with signed-URL access control, validates uploads by magic bytes (not header trust), sets the abort-incomplete-multipart lifecycle rule day-one, and estimates cost egress-first. Defaults to R2 (zero egress) with S3 as the portability contract; picks the backend per-workload. Refuses SVG-from-untrusted, object ACLs, and sizing bills from GB stored. Object storage only — DB blobs are acorn's. Powered by Energy.",
+  "version": "0.1.0",
+  "provider": { "organization": "Energy", "url": "https://github.com/naman10parikh/shelf" },
+  "endpoint": "stdio://shelf-mcp",
+  "transport": "stdio",
+  "documentationUrl": "https://github.com/naman10parikh/shelf/blob/main/AGENTS.md",
+  "capabilities": [
+    "presign",
+    "upload",
+    "get",
+    "validate",
+    "lifecycle",
+    "cost",
+    "backend-pick",
+    "migrate",
+    "scan",
+    "serve-config",
+    "brain",
+    "explain",
+    "eval"
+  ],
+  "plannedCapabilities": [
+    "cors",
+    "signed-url-round-trip-live"
+  ],
+  "capabilityNotes": {
+    "delivered": "Every command in `capabilities` produces real, $0/offline output today (verified by B2/B3 + E1). migrate/scan/serve-config landed in cluster B3 (the Wave-P PLAN provisionally listed them as planned; they are now delivered, so the card states the truth rather than under-claiming).",
+    "planned": "`cors` performs a real OPTIONS preflight and therefore needs a resolved backend (S3_ENDPOINT or R2_*); `signed-url-round-trip-live` is the end-to-end GET-without-URL→403 / with→200 / TTL-expiry assertion that runs only against live R2/S3 in an E2B sandbox (Form 2, R2-creds-gated → CHAIRMAN-CHECKLIST). The $0 MinIO merge gate (Form 1) proves the round-trip + size/type/magic-byte rejection without these."
+  },
+  "skills": [
+    {
+      "id": "presign-upload",
+      "name": "Mint a presigned upload URL the right way",
+      "description": "POST policy (size+type bounded) over PUT (can't enforce size); return the EXACT signed-header set so SDK header-drift can't masquerade as a CORS bug; effective expiry = min(set-TTL, remaining-STS-session). Encodes O-14 / S6 / S7.",
+      "tags": ["object-storage", "presigned-url", "post-policy", "uploads"]
+    },
+    {
+      "id": "validate-upload",
+      "name": "Validate an upload by magic bytes",
+      "description": "Validate by MAGIC BYTES (never client Content-Type/extension), with resource-consumption caps (decompressed size + ratio + pixel dims + time), a random server-side key, and a hard REFUSAL of SVG from untrusted users. Encodes O-02 / O-13 / S4 / S15.",
+      "tags": ["security", "magic-bytes", "stored-xss", "svg", "zip-bomb"]
+    },
+    {
+      "id": "set-lifecycle-hygiene",
+      "name": "Set the abort-incomplete-multipart rule, day one",
+      "description": "On every upload bucket, day one, set the abort-incomplete-multipart-uploads lifecycle rule — orphaned multiparts bill as storage forever and are invisible to ListObjects (the #1 mystery storage bill). Find existing orphans with rclone. Encodes O-17 / S11.",
+      "tags": ["lifecycle", "multipart", "cost", "hygiene"]
+    },
+    {
+      "id": "pick-storage-backend",
+      "name": "Pick the storage backend per-workload",
+      "description": "R2 is the default for hot/public download-many (zero egress) but the WRONG default for write-heavy ingestion, cold/archival, and event-driven — keep those on S3. Name the condition that flips the default. Encodes O-05 / O-06 / Dispute-A / S3.",
+      "tags": ["backend-selection", "r2", "s3", "egress", "per-workload"]
+    },
+    {
+      "id": "safe-serve",
+      "name": "Serve user files safely (two-sided)",
+      "description": "Two-sided defense: write-side magic-byte validate + read-side forced Content-Type + Content-Disposition attachment + nosniff + cookieless domain + CSP (one-sided defense is no defense). And DON'T invalidate the CDN on deploys — change the URL (content-hashed immutable assets). Encodes O-11 / O-20 / S12.",
+      "tags": ["serve", "cdn", "headers", "immutable", "stored-xss"]
+    }
+  ],
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"]
+}

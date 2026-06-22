@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "name": "shelf",
+  "display_name": "shelf — Object-Storage / File-Handling / CDN / Uploads Employee",
+  "description": "The Energy fleet's object-storage / file-handling / CDN / uploads employee — presigned POST policy over PUT, magic-byte upload validation, signed-URL access control, abort-incomplete-multipart lifecycle hygiene day-one, and egress-first cost. Defaults to Cloudflare R2 (zero egress) with S3 as the portability contract; picks the backend per-workload, not per-tribe. Refuses SVG-from-untrusted, object ACLs, and sizing bills from GB stored. Object storage only — DB blobs are acorn's, rate-limit/cache is echo's, session-identity is badge's. Powered by Energy.",
+  "version": "0.1.0",
+  "author": "Energy Platform",
+  "license": "MIT",
+  "repository": "https://github.com/naman10parikh/shelf",
+  "keywords": ["claude-code", "object-storage", "s3", "cloudflare-r2", "presigned-url", "upload-validation", "magic-bytes", "cdn", "lifecycle", "egress", "harness", "energy"],
+  "cli": { "command": "shelf", "bin": "./dist/index.js" },
+  "mcpServers": {
+    "shelf": {
+      "command": "node",
+      "args": ["./dist/mcp/server.js"],
+      "env": {
+        "S3_ENDPOINT": "${S3_ENDPOINT}",
+        "S3_ACCESS_KEY_ID": "${S3_ACCESS_KEY_ID}",
+        "S3_SECRET_ACCESS_KEY": "${S3_SECRET_ACCESS_KEY}",
+        "R2_ACCOUNT_ID": "${R2_ACCOUNT_ID}",
+        "R2_ENDPOINT": "${R2_ENDPOINT}",
+        "R2_ACCESS_KEY_ID": "${R2_ACCESS_KEY_ID}",
+        "R2_SECRET_ACCESS_KEY": "${R2_SECRET_ACCESS_KEY}"
+      }
+    }
+  },
+  "skills": [
+    "skills/presign-upload/SKILL.md",
+    "skills/validate-upload/SKILL.md",
+    "skills/set-lifecycle-hygiene/SKILL.md",
+    "skills/pick-storage-backend/SKILL.md",
+    "skills/safe-serve/SKILL.md"
+  ],
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Write|Edit|Bash", "command": "node \"$CLAUDE_PROJECT_DIR/hooks/block-storage-footguns.js\"" }
+    ]
+  },
+  "agents": [
+    ".claude/agents/upload-security-auditor.md",
+    ".claude/agents/storage-cost-auditor.md"
+  ],
+  "a2a": "./.well-known/agent.json",
+  "brain": "brain/MOC - shelf.md",
+  "install_instructions": "1. Install deps and build: pnpm install && pnpm build\n2. Add this plugin to Claude Code: Settings → Plugins → Add local plugin → select this directory (or `claude plugin install shelf`).\n3. Now available: the shelf CLI (presign / upload / get / validate / lifecycle / cost / backend / migrate / scan / serve-config / cors / brain / explain / eval), shelf's OWN MCP server (presign_upload / presign_get / validate_file / set_lifecycle / find_orphans / estimate_cost / pick_backend / explain_pitfall / search_brain), the 5 skills, the block-storage-footguns PreToolUse grep-gate (the dogfood: shelf's harness obeys shelf's law — it blocks object ACLs, filename-in-key, new Map() upload state, and presigned-PUT-as-size-bound), and the upload-security-auditor + storage-cost-auditor sub-agent personas.\n4. The CLI also exposes `shelf-mcp` (the MCP server entrypoint) for direct stdio use; a hosted Streamable-HTTP variant serves the same 9 tools (SHELF_MCP_HTTP). The CONSUMED Cloudflare R2 MCP (cloudflare/mcp-server-cloudflare) is registered in .mcp.json with env-refs only as a lens on the R2 default — it is NOT the presign path."
+}

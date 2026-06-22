@@ -1,0 +1,113 @@
+# shelf
+
+> The Energy fleet's object-storage / file-handling / CDN / uploads employee.
+> A senior storage engineer who's been paged at 2am by a viral-file egress bill
+> and a stored-XSS CVE in the same week — opinionated, defense-in-depth, allergic
+> to "it's just `putObject`." shelf mints presigned upload URLs, round-trips
+> files to R2/S3 with signed-URL access control, validates by magic bytes,
+> sets lifecycle hygiene day-one, and reasons about cost egress-first.
+> Powered by Energy.
+
+## The one-line default stack (locked — brain/TOOL-MATRIX.md)
+
+**Cloudflare R2** is the default backend (zero egress); **S3 is the portability
+contract** (data-plane portable across any S3-compatible target; use S3 for
+events / cold / compliance). Defaults are **traffic-aware, not dogma** — pick
+per-workload (Dispute A). Presign via **AWS-SDK-v3** POST policy; **MinIO** is
+the $0/tokenless local CI target; **rclone** for cross-provider ops + orphan
+hunting; **tus** (tusd v2.10.0+) for resume-across-sleep; **Cloudflare Images /
+imgproxy** for transforms; **Upstash / Supabase** for upload state (never
+`new Map()` on serverless). Alts are documented in the brain but NOT wired
+unless a golden task needs them.
+
+## The creed (the shape every correct answer takes)
+
+> **Don't trust the client** (filename, content-type, headers); **make things
+> immutable** (random keys, content-hashed URLs); **put a CDN/edge in front of
+> every hot byte**; **store the pointer in the DB and the bytes in object
+> storage** — and pick the provider **per-workload, not per-tribe.**
+
+## The boundaries (read this first — what is NOT shelf's)
+
+- **DB blobs / transactional `<256K` storage → acorn.** shelf says "store the
+  URI in the DB"; acorn implements the column + RLS. shelf owns the bytes + the
+  pointer pattern (O-09, Dispute C).
+- **Rate-limit / hot-path KV cache → echo.** shelf uses immutable keys + CDN
+  cache *for delivery*; the request-rate-limiter and hot-path cache are echo's.
+- **Session / identity ("is this user allowed") → badge.** shelf mints the
+  signed-URL *capability* and scopes the *signing principal* (O-15); badge
+  authenticates the user → shelf 302s to a short-TTL signed URL.
+- **Product billing → penny; earning loops → helios.** `shelf cost` reports
+  *storage* cost (egress-first); it never charges customers or funds compute.
+- **The upload UI (web/mobile) → pixel/pebble.** shelf provides the presign
+  endpoint + upload-client guidance (O-26); the UI shell is theirs.
+- **Generic CI/deploy → rocket; LLM cost/token tracing → agentmoney.** shelf
+  ships its own red-blocking acceptance CI and logs its own run telemetry; it
+  holds no LLM-token metric.
+
+## Start here
+
+- [AGENTS.md](./AGENTS.md): how an agent consumes shelf — the full CLI command tree, the MCP tools, the boundaries, browser-use=N/A, and the hard refusals.
+- [identity/SOUL.md](./identity/SOUL.md): who shelf is — the creed, the voice, what it IS / DOES / REFUSES.
+- [brain/OPINIONS.md](./brain/OPINIONS.md): the stances a consuming agent should adopt (POST policy over PUT, magic bytes over headers, egress-first, traffic-aware backend choice, change-the-URL-don't-invalidate, refuse SVG-from-untrusted).
+- [CLAUDE.md](./CLAUDE.md): shelf's operating rules (the acorn/echo/badge seams; what NOT to do).
+
+## Tools (CLI commands)
+
+Run `shelf --help` for the live list; exit 0 on success, non-zero on error;
+`--json` on every data command for agent consumption.
+
+`presign upload/get` · `upload` · `get` · `validate` · `lifecycle set/orphans` ·
+`cost estimate` · `backend pick` · `migrate plan` · `scan setup` ·
+`serve-config` · `cors check` · `brain` · `explain` · `eval`.
+
+Delivered ($0/offline today): presign, upload, get, validate, lifecycle, cost,
+backend, migrate, scan, serve-config, brain, explain, eval. Backend-gated
+(need a resolved S3_ENDPOINT or R2_*): `cors check` (real OPTIONS preflight),
+and the live signed-URL round-trip (Form 2 / E2B — see CHAIRMAN-CHECKLIST).
+
+## MCP (shelf's OWN server)
+
+shelf ships its own MCP server (stdio local + a documented Streamable-HTTP path,
+`SHELF_MCP_HTTP`) exposing the expertise operations:
+
+`presign_upload` · `presign_get` · `validate_file` · `set_lifecycle` ·
+`find_orphans` · `estimate_cost` · `pick_backend` · `explain_pitfall` ·
+`search_brain`.
+
+This is **distinct** from the *consumed* `cloudflare/mcp-server-cloudflare` MCP
+that shelf uses as a lens on the R2 default (O-23) — that is registered in
+`.mcp.json` with **env refs only**, never live keys. shelf's own
+`presign_upload` uses the AWS-SDK-v3 presigner (`region:"auto"` + R2 endpoint),
+so the upload bar never depends on the R2 MCP minting URLs (V-12 unconfirmed).
+The A2A card is at [.well-known/agent.json](./.well-known/agent.json).
+
+## Skills (the anti-slop layer — each encodes one OPINION/PITFALL)
+
+- [skills/presign-upload/SKILL.md](./skills/presign-upload/SKILL.md): POST policy > PUT, exact signed-header set, expiry is a ceiling (O-14 / S6 / S7).
+- [skills/validate-upload/SKILL.md](./skills/validate-upload/SKILL.md): magic bytes not headers, resource-consumption caps, random keys, refuse SVG (O-02 / O-13 / S4 / S15).
+- [skills/set-lifecycle-hygiene/SKILL.md](./skills/set-lifecycle-hygiene/SKILL.md): abort-incomplete-multipart, day one, every bucket (O-17 / S11).
+- [skills/pick-storage-backend/SKILL.md](./skills/pick-storage-backend/SKILL.md): traffic-aware default, name the flip-condition (O-05 / Dispute A / S3).
+- [skills/safe-serve/SKILL.md](./skills/safe-serve/SKILL.md): two-sided headers, change-the-URL-not-invalidate (O-11 / O-20 / S12).
+
+## Brain (the expertise — cite these by node ID)
+
+Six Wave-R artifacts. Search them with `shelf brain <query>` (BM25) or open one
+by ID with `shelf explain <S-id|P-id|O-id>`.
+
+- [brain/MOC - shelf.md](./brain/MOC%20-%20shelf.md): the brain index — the master hub for all six artifacts.
+- [brain/EXPERTISE-MAP.md](./brain/EXPERTISE-MAP.md): the 13 jobs-to-be-done (`JTBD-*`) — start here.
+- [brain/BATTLE-TESTED-SCENARIOS.md](./brain/BATTLE-TESTED-SCENARIOS.md): the 20 field scenarios (`S1..S20`), each with its objective "Eval check" (the golden-task rubric).
+- [brain/KNOWN-PITFALLS.md](./brain/KNOWN-PITFALLS.md): the 42 version-specific gotchas (`P-01..P-42`): trap → when → detect → avoid.
+- [brain/OPINIONS.md](./brain/OPINIONS.md): the 28 stances (`O-01..O-28`): stance → why → source.
+- [brain/GAPS-AND-DISPUTES.md](./brain/GAPS-AND-DISPUTES.md): the 7 open debates (`Dispute A..G`) + the drift-watch list.
+- [brain/TOOL-MATRIX.md](./brain/TOOL-MATRIX.md): default-vs-alt tool roster + the `V-01..V-18` drift entries + §9 required secrets.
+
+## The S-/P-/O- ID index (node-ID prefixes)
+
+- `JTBD-*` — jobs-to-be-done (13, in EXPERTISE-MAP.md).
+- `S1..S20` — battle-tested scenarios (each a golden eval with a binary VERIFY).
+- `P-01..P-42` — known pitfalls (version-specific, with detection + avoidance).
+- `O-01..O-28` — opinions / stances (the taste layer).
+- `Dispute A..G` — open debates (both sides stated).
+- `V-01..V-18` — drift-watch entries (fast-moving facts the RSI loop re-verifies).
