@@ -1,0 +1,28 @@
+{
+  "_doc": "Pinned drift-watch snapshot for the deterministic RSI loop (E4 / workflows/rsi.workflow.js). The vertical's NUMBERS and platform DEFAULTS drift fast (O-28, brain/GAPS-AND-DISPUTES V-01..V-13). The loop re-checks these pins against the live source of truth (src/lib/cost.ts PRICING for prices; the tool-status watchlist below) by STRING/VERSION DIFF — no tokens. A mismatch is flagged as drift to PROPOSE (never auto-commit). Re-pin (deliberately) when a fact is re-verified live. Snapshot date: 2026-06-16 (one day pre-build, per the brain).",
+  "snapshotDate": "2026-06-16",
+  "pricing": {
+    "_source": "src/lib/cost.ts PRICING — directional list prices (O-28); the loop diffs live cost.ts against these.",
+    "r2": { "storagePerGbMo": 0.015, "egressPerGb": 0.0 },
+    "s3": { "storagePerGbMo": 0.023, "egressPerGb": 0.09 }
+  },
+  "vEntries": {
+    "_doc": "The must-verify-live facts (brain/GAPS-AND-DISPUTES Part 2). pinnedValue = the value asserted at snapshot time; the loop flags it for re-verify if its half-life has elapsed or a live check disagrees.",
+    "V-04": { "fact": "boto3 generate_presigned_post() content-length-range bug #2261 fixed in latest botocore?", "pinnedValue": "unconfirmed", "halfLifeDays": 90 },
+    "V-09": { "fact": "CloudFront propagation 10-60s + 15-invalidation-paths-in-progress cap", "pinnedValue": "10-60s / 15-cap", "halfLifeDays": 180 },
+    "V-10": { "fact": "rclone latest patch (v1.70.x at research time; v1.71 shipped?)", "pinnedValue": "v1.70.3", "halfLifeDays": 90 },
+    "V-11": { "fact": "tusd / tus-js-client currency (tusd v2.10.0+ pinned; tus-js-client v4.3.1 2025-01-16)", "pinnedValue": "tusd>=2.10.0, tus-js-client 4.3.1", "halfLifeDays": 120 },
+    "V-12": { "fact": "Does the Cloudflare R2 MCP expose presigned-URL GENERATION (vs only CRUD)?", "pinnedValue": "unconfirmed", "halfLifeDays": 90 },
+    "P-13": { "fact": "S3 ACLs DISABLED by default (BucketOwnerEnforced) — object ACL throws", "pinnedValue": "disabled-by-default", "halfLifeDays": 365 },
+    "P-14": { "fact": "S3 Block Public Access ON by default for new buckets", "pinnedValue": "bpa-on-by-default", "halfLifeDays": 365 }
+  },
+  "toolStatus": {
+    "_doc": "Tools shelf recommends/wires must stay ACTIVE. status:active = healthy; status:archived = EOL → must NOT be recommended (the P-39 class). The loop flags any tool whose status is 'archived' as drift (a recommended tool went dead). bucket-antivirus-function is the canonical archived example — it is recorded archived ON PURPOSE so shelf never recommends it; if any ACTIVE-listed tool flips to archived, that is the drift to catch.",
+    "aws-sdk-v3": { "status": "active", "role": "default presigner (S6/S7)" },
+    "rclone": { "status": "active", "role": "cross-provider ops + orphaned-multipart discovery (S11/S18)" },
+    "tusd": { "status": "active", "role": "resumable uploads (S10)" },
+    "file-type": { "status": "active", "role": "magic-byte validation (S4)" },
+    "cloudflare-mcp-server": { "status": "active", "role": "consumed R2 lens (O-23)" },
+    "bucket-antivirus-function": { "status": "archived", "role": "OSS S3 ClamAV (P-39 / G-02) — ARCHIVED 2024-04, do NOT recommend; off-AWS AV is a pattern you own (O-19)" }
+  }
+}
