@@ -54,12 +54,16 @@ export const FOOTGUN_PATTERNS = [
   {
     // P-13: an object ACL set to a public value — `ACL: 'public-read'` / `ACL:"public-read"`
     // / `"ACL":"public-read"`. Requires the `ACL` *key* immediately bound (`:`) to a quoted
-    // public-* value — a prose mention like "never set ACL: 'public-read'" in a code fence
-    // would still be code-shaped, but the dogfood reality is shelf's docs phrase it as a
-    // refusal ("`ACL:'public-read'` / object ACLs — throws") which DOES carry the shape; we
-    // accept that the hook is conservative (better to gate a doc edit than miss real code) —
-    // the verify removes the string and the action passes, proving both directions.
+    // public-* value. shelf's OWN identity/brain docs (SOUL.md, CLAUDE.md, AGENTS.md,
+    // OPINIONS.md, KNOWN-PITFALLS.md) quote this exact footgun as a refusal inside markdown
+    // **inline code** ("`ACL:'public-read'` / object ACLs — throws"). Real .ts/.js source
+    // never wraps an object key in backticks, so `stripInlineCode:true` removes those prose
+    // MENTIONS before the test — the dogfood rule ("shelf's own anti-pattern docs stay
+    // un-blocked") is actually honored, while real code (`putObject({ ACL: 'public-read' })`)
+    // still fires. (Only P-13 strips inline-code; P-12 must NOT — it matches real template
+    // literals that legitimately use backticks.)
     rule: "P-13-object-acl",
+    stripInlineCode: true,
     regex: /["']?ACL["']?\s*:\s*["'](?:public-read(?:-write)?|authenticated-read)["']/,
     why: "an object ACL set to a public value (P-13/O-16). S3 disables ACLs by default → `putObject({ACL:'public-read'})` throws AccessControlListNotSupported. Use a bucket policy or a CDN in front; never an object ACL.",
   },
@@ -93,11 +97,22 @@ export const FOOTGUN_PATTERNS = [
   },
 ];
 
+/**
+ * Replace markdown inline-code spans (`` `…` ``) with a space. Used only for patterns
+ * flagged `stripInlineCode` (P-13) so a footgun MENTIONED in prose inline-code is not
+ * treated as written code. Real source files have no inline-code around tokens, so this
+ * is a no-op on them. NOT applied to P-12 (template literals legitimately use backticks).
+ */
+function stripInlineCode(text) {
+  return text.replace(/`[^`]*`/g, " ");
+}
+
 /** First footgun-shaped hit in `text` → { rule, why } | null. */
 export function findFootgun(text) {
   if (typeof text !== "string" || text.length === 0) return null;
-  for (const { rule, regex, why } of FOOTGUN_PATTERNS) {
-    if (regex.test(text)) return { rule, why };
+  for (const pattern of FOOTGUN_PATTERNS) {
+    const subject = pattern.stripInlineCode ? stripInlineCode(text) : text;
+    if (pattern.regex.test(subject)) return { rule: pattern.rule, why: pattern.why };
   }
   return null;
 }
