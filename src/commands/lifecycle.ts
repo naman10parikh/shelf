@@ -29,12 +29,53 @@ export function registerLifecycle(program: Command): void {
           AbortIncompleteMultipartUpload: { DaysAfterInitiation: opts.abortAfterDays },
         };
         recordToolCall();
-        await target.client.send(
-          new PutBucketLifecycleConfigurationCommand({
-            Bucket: opts.bucket,
-            LifecycleConfiguration: { Rules: [rule] },
-          }),
-        );
+        try {
+          await target.client.send(
+            new PutBucketLifecycleConfigurationCommand({
+              Bucket: opts.bucket,
+              LifecycleConfiguration: { Rules: [rule] },
+            }),
+          );
+        } catch (err) {
+          // Some S3-compatible backends (notably MinIO RELEASE.2025-09-07+, minio/minio#16120) reject a
+          // lifecycle rule whose ONLY action is AbortIncompleteMultipartUpload — they require an
+          // expiration/transition action and return a misleading "MalformedXML"/"InvalidArgument". The
+          // abort-only rule IS valid on AWS S3 and Cloudflare R2 (shelf's defaults), which is the correct
+          // O-17 shape (clean up dead multiparts WITHOUT expiring the user's objects). We refuse to
+          // silently inject an object-expiration here (that would delete data the user never asked to
+          // expire). Surface the real cause + the safe next step instead of the raw XML error.
+          const name = (err as { name?: string }).name ?? "";
+          const msg = ((err as { message?: string }).message ?? "").toLowerCase();
+          // MalformedXML is unambiguous. InvalidArgument is broader, so additionally require the message
+          // to indicate a schema/XML rejection (MinIO's wording) — a genuinely-different InvalidArgument
+          // (or any other error code, e.g. NoSuchBucket/AccessDenied on real S3/R2) still surfaces loudly.
+          const isLifecycleSchemaReject =
+            name === "MalformedXML" ||
+            (name === "InvalidArgument" && (msg.includes("xml") || msg.includes("well-formed") || msg.includes("schema")));
+          if (isLifecycleSchemaReject) {
+            note(
+              `this backend (${target.backend}) rejected an abort-incomplete-multipart-ONLY lifecycle rule ` +
+                `(${name}). Some S3-compatible servers — notably MinIO (minio/minio#16120) — require a ` +
+                `lifecycle rule to carry an expiration/transition action and don't support abort-only rules. ` +
+                `The rule shelf set IS valid + correct on AWS S3 and Cloudflare R2 (shelf's defaults), where ` +
+                `it cleans up dead multiparts WITHOUT expiring your objects (O-17). shelf will NOT silently ` +
+                `add an object-expiration to satisfy this backend (that would delete data you didn't ask to ` +
+                `expire). To enforce the day-one rule, apply it on R2/S3; on this backend, add an explicit ` +
+                `expiration yourself if that's truly what you want.`,
+            );
+            emit({
+              ok: false,
+              bucket: opts.bucket,
+              backend: target.backend,
+              abortAfterDays: opts.abortAfterDays,
+              reason: "backend rejects abort-incomplete-multipart-only lifecycle rule",
+              errorCode: name,
+              validOn: "AWS S3 / Cloudflare R2 (abort-only rules are accepted there — the correct O-17 shape)",
+            });
+            return;
+          }
+          throw err;
+        }
         setAudit({ backend: target.backend, key: opts.bucket });
         emit(
           { ok: true, bucket: opts.bucket, abortAfterDays: opts.abortAfterDays, backend: target.backend, rule },
