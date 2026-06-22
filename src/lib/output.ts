@@ -20,8 +20,13 @@ export function isJsonMode(): boolean {
 /**
  * Emit a successful data payload. In --json mode prints the object as JSON; otherwise prints `human`
  * (a pre-formatted string) if given, else a compact key: value dump.
+ *
+ * `payload` is `unknown` (not `Record<string, unknown>`) so typed-interface results from the shared libs
+ * (cost.estimateCost → CostEstimate, recommendations.pickBackend → BackendRec, …) pass without an `as`
+ * cast — a TS interface does not satisfy the Record index signature, but emit only stringifies or
+ * Object.entries() the value, both of which are safe here.
  */
-export function emit(payload: Record<string, unknown>, human?: string): void {
+export function emit(payload: unknown, human?: string): void {
   if (jsonMode) {
     process.stdout.write(JSON.stringify(payload, null, 2) + "\n");
     return;
@@ -30,9 +35,13 @@ export function emit(payload: Record<string, unknown>, human?: string): void {
     process.stdout.write(human + "\n");
     return;
   }
-  for (const [k, v] of Object.entries(payload)) {
-    process.stdout.write(`${chalk.dim(k + ":")} ${typeof v === "object" ? JSON.stringify(v) : String(v)}\n`);
+  if (payload !== null && typeof payload === "object") {
+    for (const [k, v] of Object.entries(payload)) {
+      process.stdout.write(`${chalk.dim(k + ":")} ${typeof v === "object" ? JSON.stringify(v) : String(v)}\n`);
+    }
+    return;
   }
+  process.stdout.write(String(payload) + "\n");
 }
 
 /** A non-fatal advisory line (the opinionated warnings shelf prints — e.g. the PUT-can't-bound-size caveat). */
