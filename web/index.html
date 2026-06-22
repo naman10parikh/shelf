@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>shelf cockpit — object storage · uploads · CDN · presigned URLs</title>
+    <!-- Instrument Serif (display) + Poppins (body) — the anti-AI-slop serif+sans pairing -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <!-- warm-black token inlined so the served HTML carries #141312 even before CSS loads
+         (shelf's brand is intentionally warm-black + amber, never the generic AI-slop palette) -->
+    <style>
+      html {
+        background: #141312;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="masthead">
+        <div class="brand">
+          <span class="logo">shelf</span>
+          <span class="tagline"
+            >Store the pointer in the DB and the bytes in object storage — presigned POST &gt; PUT,
+            magic-byte validation, a CDN in front of every hot byte, the right provider per workload.</span
+          >
+        </div>
+        <span class="boundary">object storage + uploads + CDN only · read-mostly cockpit</span>
+      </header>
+
+      <nav class="tabs" role="tablist" aria-label="cockpit views">
+        <button role="tab" data-view="brain" aria-selected="true">Brain browser</button>
+        <button role="tab" data-view="runs" aria-selected="false">Run log</button>
+        <button role="tab" data-view="eval" aria-selected="false">Eval scores</button>
+        <button role="tab" data-view="analyze" aria-selected="false">Backend &amp; cost</button>
+        <button role="tab" data-view="ask" aria-selected="false">Ask the employee</button>
+        <button role="tab" data-view="upload" aria-selected="false">Upload demo</button>
+      </nav>
+
+      <!-- VIEW 1: Brain browser -->
+      <section class="view active" id="view-brain" role="tabpanel">
+        <h2>Brain browser</h2>
+        <p class="sub">
+          The expertise brain (brain/*.md), rendered + BM25-searchable. Search a symptom, then click a hit
+          (S-/P-/O-/Dispute/JTBD id) to read the full scenario → trap → resolution → source. The expertise
+          made legible.
+        </p>
+        <div class="searchbar">
+          <input id="brain-q" type="search" placeholder="e.g. presigned PUT size limit, CDN stale avatar, R2 vs S3 egress, SVG upload XSS" />
+          <button id="brain-go">Search</button>
+        </div>
+        <div class="bento-brain">
+          <div class="card">
+            <div class="card-eyebrow">Artifacts</div>
+            <div class="artifact-list" id="artifact-list"></div>
+          </div>
+          <div>
+            <div id="brain-hits"></div>
+            <div class="reader" id="brain-reader"><span class="empty">Search above or pick an artifact to read.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: Run log -->
+      <section class="view" id="view-runs" role="tabpanel">
+        <h2>Run log</h2>
+        <p class="sub">
+          <code>logs/runs.jsonl</code> tail — every <code>shelf</code> run as a wide event: command, args,
+          model, measured duration, trace.id, outcome. The dogfooded trail, one structured line per run.
+        </p>
+        <div class="card" id="runs-wrap"><span class="loading">Loading run log…</span></div>
+      </section>
+
+      <!-- VIEW 3: Eval scores -->
+      <section class="view" id="view-eval" role="tabpanel">
+        <h2>Eval scores</h2>
+        <p class="sub">
+          The golden-task suite (<code>eval/golden/GT-*.json</code>) — the same contract <code>shelf eval</code>
+          runs across the pyramid (L1 structural / L2 golden / L3 judge). Per task: scenario, levels, check
+          count, and whether it <strong>blocks CI</strong>. The bar made visible.
+        </p>
+        <div id="eval-wrap"><span class="loading">Reading the golden-task suite…</span></div>
+      </section>
+
+      <!-- VIEW 4: Backend & cost analyzer -->
+      <section class="view" id="view-analyze" role="tabpanel">
+        <h2>Backend &amp; cost analyzer</h2>
+        <p class="sub">
+          Two read-only analyzers. <strong>Backend pick</strong> recommends a provider per workload + the
+          condition that flips it (R2 default, but traffic-aware, not dogma). <strong>Cost estimate</strong>
+          runs the egress-first R2-vs-S3 flip math — the number that actually drives the bill.
+        </p>
+
+        <div class="analyze-grid">
+          <div class="card">
+            <div class="card-eyebrow">Backend pick — by workload</div>
+            <div class="chip-row" id="workload-chips"></div>
+            <div id="backend-result"><span class="empty">Pick a workload above.</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-eyebrow">Cost estimate — egress-first</div>
+            <div class="cost-form">
+              <label>egress GB/mo <input id="cost-egress" type="number" min="0" value="1000" /></label>
+              <label>storage GB <input id="cost-storage" type="number" min="0" value="500" /></label>
+              <button id="cost-go">Estimate</button>
+            </div>
+            <div id="cost-result"><span class="empty">Enter egress + storage, then Estimate.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: Ask the employee -->
+      <section class="view" id="view-ask" role="tabpanel">
+        <h2>Ask the employee</h2>
+        <p class="sub">
+          Runs <code>shelf explain</code> read-only over the brain. "What does shelf think about presigned
+          PUT?" → O-14 + P-01 + S6. Ask a scenario/pitfall/opinion id directly (e.g. <code>S6</code>,
+          <code>P-01</code>, <code>O-14</code>, <code>Dispute F</code>) for the full walk.
+        </p>
+        <div class="searchbar">
+          <input id="ask-q" type="search" placeholder="Ask a question, or type an id like S6 / P-01 / O-14 / Dispute F" />
+          <button id="ask-go">Ask</button>
+        </div>
+        <div class="answer" id="ask-answer"></div>
+      </section>
+
+      <!-- VIEW 6: Upload demo (bonus stub) -->
+      <section class="view" id="view-upload" role="tabpanel">
+        <h2>Upload demo</h2>
+        <p class="sub">
+          The acceptance bar, explained. shelf's upload path is <code>validate → presign POST → upload →
+          HEAD re-validate</code>. This cockpit is <strong>read-mostly</strong>, so it does not fire a live
+          upload from the browser (no creds, no bucket mutation) — instead it shows the exact command + the
+          presigned-POST-over-PUT rationale, the way you'd run it from a terminal.
+        </p>
+        <div class="card upload-demo">
+          <div class="card-eyebrow">Run it from a terminal (the bar)</div>
+          <pre class="cmd"><span class="prompt">$</span> shelf upload ./avatar.png --bucket my-bucket --key users/42/avatar.png</pre>
+          <ol class="upload-steps">
+            <li><strong>validate</strong> — magic-byte sniff + resource-consumption caps; refuses SVG-from-untrusted (the XSS vector). Never trust the client's <code>Content-Type</code>.</li>
+            <li><strong>presign POST</strong> — a POST <em>policy</em> (signs fields + conditions, and can <em>enforce</em> size/type) beats a presigned PUT, which silently ignores your size/type limit (P-01).</li>
+            <li><strong>upload</strong> — the browser/CLI POSTs the bytes straight to the bucket; the server never proxies the payload.</li>
+            <li><strong>HEAD re-validate</strong> — confirm the stored object's size/type matches what you signed; immutable key + DB pointer (so the CDN never serves a stale byte).</li>
+          </ol>
+          <p class="upload-foot">
+            Want the URLs without uploading? The read-only mint lives in the CLI:
+            <code>shelf presign upload --bucket … --key …</code> and <code>shelf presign get --bucket … --key …</code>.
+          </p>
+        </div>
+      </section>
+
+      <footer class="foot">
+        shelf · read-mostly cockpit (does not mint a live presigned URL / upload / migrate from the browser)
+        · warm-black #141312 · Powered by Energy
+      </footer>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
