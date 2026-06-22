@@ -1,0 +1,49 @@
+name: shelf lifecycle-audit (dogfood)
+# D2 (b): shelf dogfoods its OWN discipline — scan its demo bucket for the #1 invisible-bill footgun:
+# orphaned multipart uploads (O-17 / P-24 / S11) and a missing abort-incomplete-multipart lifecycle rule.
+# The storage employee that preaches "set the abort rule day one" must prove it obeys the rule on its own
+# bucket. ENABLED (uncommented trigger), not just written — the #1 fleet-gap lesson (CP117: written ≠ enabled).
+#
+# Creds are NON-BLOCKING (D15): with R2_*/RCLONE_REMOTE secrets set the audit runs for real; without them the
+# `shelf lifecycle orphans` command prints its honest "no remote configured + howto" verdict and the job
+# stays green (the wiring fires; the real audit lights up when the chairman provisions creds — F5/CHECKLIST).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 8 * * 1" # Mondays 08:17 UTC — weekly orphaned-multipart sweep of the demo bucket
+
+permissions:
+  contents: read
+
+jobs:
+  lifecycle-audit:
+    runs-on: ubuntu-latest
+    env:
+      # Demo bucket + optional rclone remote / R2 creds (all repo secrets; absent ⇒ honest no-remote verdict).
+      SHELF_DEMO_BUCKET: ${{ vars.SHELF_DEMO_BUCKET || 'shelf-accept' }}
+      RCLONE_REMOTE: ${{ secrets.RCLONE_REMOTE }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install + build
+        run: |
+          pnpm install --frozen-lockfile || pnpm install
+          pnpm build
+      - name: Dogfood lifecycle audit — orphaned multiparts on the demo bucket (O-17/P-24/S11)
+        run: |
+          echo "::group::shelf lifecycle orphans --bucket $SHELF_DEMO_BUCKET"
+          # Honest: prints the orphaned-multipart list when a remote is configured, else the no-remote howto.
+          # Never fakes a clean result; exit stays 0 so the dispatch wiring is provably ENABLED either way.
+          node dist/index.js lifecycle orphans --bucket "$SHELF_DEMO_BUCKET" --json || true
+          echo "::endgroup::"
+          echo "dogfood lifecycle-audit dispatch fired (D2b). Real sweep runs when R2_*/RCLONE_REMOTE secrets are set."

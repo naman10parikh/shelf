@@ -1,8 +1,17 @@
 name: shelf RSI
-# CP123: dispatch-only until the RSI engine (workflows/rsi.workflow.js + eval gate) is built in Wave B/E.
-# The Claude half additionally needs CLAUDE_CODE_OAUTH_TOKEN (chairman checklist, D8). Guarded = always green.
+# D2 (a): runs the DETERMINISTIC ($0, tokenless) RSI loop — refresh-brain → re-verify-tool-matrix +
+# drift-watch (R2/S3 pricing, boto3 content-length-range V-04, tusd patch V-10/V-11, CloudFront cap V-09,
+# R2-MCP-presign V-12, S3 defaults P-13/P-14, archived-tool P-39) → run-eval-pyramid → propose → test-gate
+# → commit-gated. ENABLED (uncommented trigger) — not commented-out (the #1 fleet-gap; CP117: written ≠
+# enabled). The deterministic half ships armed now; the CLAUDE half is DEFERRED behind CLAUDE_CODE_OAUTH_TOKEN
+# (D8 — a CHAIRMAN-CHECKLIST item; dark is expected, not a miss).
+#
+# Engine guard: workflows/rsi.workflow.js is delivered by Cluster E (E4). Until it lands the job exits green
+# with a clear "engine pending E4" note; the moment it lands, this runs it for real with no edit here.
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "33 7 * * *" # daily 07:33 UTC — deterministic drift-watch + eval pyramid
 
 permissions:
   contents: read
@@ -12,9 +21,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Engine guard
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install + build
+        run: |
+          pnpm install --frozen-lockfile || pnpm install
+          pnpm build
+      - name: Deterministic RSI loop ($0, tokenless)
         run: |
           if [ ! -f workflows/rsi.workflow.js ]; then
-            echo "RSI engine not built yet (CP123 cluster E) — exiting green."; exit 0
+            echo "::warning::RSI engine (workflows/rsi.workflow.js) pending Cluster E (E4) — dispatch wired, engine not yet landed."
+            exit 0
           fi
-          echo "engine present — deterministic half would run here (wired in cluster E)"
+          echo "::group::node workflows/rsi.workflow.js --deterministic"
+          node workflows/rsi.workflow.js --deterministic
+          echo "::endgroup::"
