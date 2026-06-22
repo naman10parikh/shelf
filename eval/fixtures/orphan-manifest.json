@@ -1,0 +1,12 @@
+{
+  "_comment": "Fixture for storage-cost-auditor: a bucket whose ListMultipartUploads shows orphaned (started-but-never-completed) multiparts that ListObjects can't see, AND no abort-incomplete-multipart lifecycle rule. Shape mirrors `rclone backend list-multipart-uploads <remote>:` / S3 ListMultipartUploads output. The auditor should flag P-24/S11 (invisible orphaned-multipart bill) + O-17 (missing day-one abort rule).",
+  "bucket": "shelf-demo",
+  "backend": "r2",
+  "lifecycleRules": [],
+  "visibleObjects": { "count": 1240, "totalBytes": 5368709120 },
+  "multipartUploads": [
+    { "key": "uploads/9f3c-incomplete.bin", "uploadId": "AbC1", "initiated": "2026-03-02T11:04:00Z", "partsUploaded": 18, "bytesSoFar": 943718400 },
+    { "key": "uploads/2a7e-incomplete.mp4", "uploadId": "DeF2", "initiated": "2026-04-18T22:51:00Z", "partsUploaded": 41, "bytesSoFar": 2147483648 },
+    { "key": "uploads/c105-incomplete.zip", "uploadId": "GhI3", "initiated": "2026-05-30T07:12:00Z", "partsUploaded": 6, "bytesSoFar": 314572800 }
+  ]
+}
