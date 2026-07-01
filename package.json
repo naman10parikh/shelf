@@ -30,6 +30,7 @@
     "test": "vitest run --passWithNoTests",
     "test:acceptance": "vitest run eval/acceptance/form1-minio.test.ts",
     "eval": "node dist/index.js eval",
+    "sandbox": "node sandbox/boot.mjs",
     "mcp": "node dist/mcp/server.js",
     "rsi": "node workflows/rsi.workflow.js --deterministic",
     "prepublishOnly": "pnpm build && pnpm test"
@@ -60,6 +61,7 @@
   },
   "devDependencies": {
     "@types/node": "22.10.5",
+    "e2b": "^2.30.4",
     "typescript": "5.7.3",
     "vitest": "2.1.8"
   }

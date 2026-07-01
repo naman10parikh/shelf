@@ -64,7 +64,7 @@ async function main() {
   // print the one install command and SKIP (don't fail CI for a missing additive dep).
   let Sandbox;
   try {
-    ({ default: Sandbox } = await import("e2b"));
+    ({ Sandbox } = await import("e2b"));
   } catch {
     done(
       SKIP,

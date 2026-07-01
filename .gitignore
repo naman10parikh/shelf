@@ -29,6 +29,9 @@ vault/Untitled*.base
 # Build output (shelf CLI/MCP) — never commit compiled artifacts
 dist/
 
+# npm pack tarball — regenerable, produced by sandbox/boot.mjs + form2-e2b.mjs to install shelf in-VM
+*.tgz
+
 # Observability run log — runtime artifact (append-only, churns every run); dir kept via logs/.gitkeep
 logs/runs.jsonl
 

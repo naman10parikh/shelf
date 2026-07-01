@@ -115,3 +115,40 @@ jobs:
 
       - name: E2B live-R2 acceptance (Form 2 — only with creds; additive, never blocks)
         run: node eval/acceptance/form2-e2b.mjs
+
+  # ADDITIVE, `push`-only, NON-BLOCKING: the E2B Firecracker SANDBOX-COMPONENT boot (MASTER-TODOS row 11).
+  # It boots a microVM, packs + installs the real `shelf` CLI in-VM, runs the load-bearing `shelf validate`
+  # verb INSIDE the sandbox (good PNG rc=0, HTML-as-PNG rc≠0 — the O-02/P-07 magic-byte gate), records the
+  # cold start to logs/runs.jsonl, and tears down. This is the Sandbox-component gate, NOT the merge gate —
+  # the `acceptance` job above still gates the merge on the $0 MinIO runner (D15/RQ-8). `continue-on-error`
+  # + `push`-only means it can NEVER turn the merge gate red. Absent E2B_API_KEY, sandbox/boot.mjs runs the
+  # same `shelf validate` assertions on the host ($0 fallback) and still exits 0. It needs NO R2_* creds —
+  # the live-R2 object round-trip is the separate `acceptance-live` (Form 2) job above.
+  sandbox-boot:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
+    continue-on-error: true
+    env:
+      E2B_API_KEY: ${{ secrets.E2B_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install deps (+ e2b for the live boot)
+        run: |
+          pnpm install --frozen-lockfile || pnpm install
+          pnpm add -D e2b || true
+
+      - name: Build
+        run: pnpm build
+
+      - name: E2B sandbox-boot (shelf validate in-VM; $0 host fallback if no key — additive, never blocks)
+        run: node sandbox/boot.mjs
