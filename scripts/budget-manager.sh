@@ -25,7 +25,7 @@ SETTINGS_FILE="$PROJECT_DIR/.claude/settings.local.json"
 
 tier_name() {
   case "$1" in
-    1) echo "FULL POWER (CP123-C: Opus-4.8 1M main + subagents, max effort — Fable disabled)" ;;
+    1) echo "FULL POWER (CP123-C: latest flagship Opus (Opus 5) 1M main + subagents, max effort — Fable disabled)" ;;
     2) echo "BALANCED (opusplan + high effort)" ;;
     3) echo "CONSERVE (Sonnet + high effort)" ;;
     4) echo "EMERGENCY (Sonnet + medium effort)" ;;
@@ -35,7 +35,7 @@ tier_name() {
 
 tier_env_model() {
   case "$1" in
-    1) echo "claude-opus-4-8[1m]" ;; # CP123-C (2026-06-12): Fable 5 temporarily disabled by chairman -> tier-1 = Opus 4.8 1M (model+subagent); revert at CP123 close
+    1) echo "claude-opus-5" ;; # CP123-C (2026-06-12): Fable 5 temporarily disabled by chairman -> tier-1 = latest flagship Opus (Opus 5) 1M (model+subagent); revert at CP123 close
     2) echo "opusplan" ;;
     3) echo "sonnet" ;;
     4) echo "sonnet" ;;
@@ -53,7 +53,7 @@ tier_env_effort() {
 
 tier_env_subagent() {
   case "$1" in
-    1) echo "claude-opus-4-8[1m]" ;; # CP123: subagent default = Opus 4.8 1M (was "" inherit); revert at CP123 close
+    1) echo "claude-opus-5" ;; # CP123: subagent default = latest flagship Opus (Opus 5) 1M (was "" inherit); revert at CP123 close
     2) echo "sonnet" ;; # Sonnet subagents
     3) echo "haiku" ;;  # Haiku subagents
     4) echo "haiku" ;;  # Haiku subagents
@@ -208,14 +208,11 @@ with open("$SETTINGS_FILE", "r") as f:
 
 env = settings.get("env", {})
 
-# Set model routing env vars
-env["ANTHROPIC_MODEL"] = "$model"
-env["CLAUDE_CODE_EFFORT_LEVEL"] = "$effort"
-
-if "$subagent":
-    env["CLAUDE_CODE_SUBAGENT_MODEL"] = "$subagent"
-elif "CLAUDE_CODE_SUBAGENT_MODEL" in env:
-    del env["CLAUDE_CODE_SUBAGENT_MODEL"]
+# Never pin a model and never lower effort (chairman, 2026-09-22). Claude Code's default is the
+# recommended frontier model and it auto-upgrades; the ID this used to write (claude-opus-5, a
+# CP123 leftover) froze every session. The budget tiers are disabled, so apply only cleans up.
+env.pop("ANTHROPIC_MODEL", None)
+env.pop("CLAUDE_CODE_SUBAGENT_MODEL", None)
 
 settings["env"] = env
 
@@ -223,7 +220,7 @@ with open("$SETTINGS_FILE", "w") as f:
     json.dump(settings, f, indent=2)
     f.write("\n")
 
-print("Settings updated: model=$model, effort=$effort, subagent=${subagent:-inherit}")
+print("Model left to the Claude Code default (no pin written); effort untouched.")
 PYEOF
 }
 
