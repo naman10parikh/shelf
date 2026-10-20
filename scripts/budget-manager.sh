@@ -35,7 +35,7 @@ tier_name() {
 
 tier_env_model() {
   case "$1" in
-    1) echo "claude-opus-5" ;; # CP123-C (2026-06-12): Fable 5 temporarily disabled by chairman -> tier-1 = latest flagship Opus (Opus 5) 1M (model+subagent); revert at CP123 close
+    1) echo "opus" ;; # the alias, never an ID: it upgrades itself (chairman, 2026-09-22); never Fable
     2) echo "opusplan" ;;
     3) echo "sonnet" ;;
     4) echo "sonnet" ;;
@@ -53,7 +53,7 @@ tier_env_effort() {
 
 tier_env_subagent() {
   case "$1" in
-    1) echo "claude-opus-5" ;; # CP123: subagent default = latest flagship Opus (Opus 5) 1M (was "" inherit); revert at CP123 close
+    1) echo "opus" ;; # the alias, never an ID: it upgrades itself (chairman, 2026-09-22); never Fable
     2) echo "sonnet" ;; # Sonnet subagents
     3) echo "haiku" ;;  # Haiku subagents
     4) echo "haiku" ;;  # Haiku subagents
@@ -209,8 +209,8 @@ with open("$SETTINGS_FILE", "r") as f:
 env = settings.get("env", {})
 
 # Never pin a model and never lower effort (chairman, 2026-09-22). Claude Code's default is the
-# recommended frontier model and it auto-upgrades; the ID this used to write (claude-opus-5, a
-# CP123 leftover) froze every session. The budget tiers are disabled, so apply only cleans up.
+# recommended frontier model and it auto-upgrades; the ID this used to write (a CP123
+# leftover) froze every session. The budget tiers are disabled, so apply only cleans up.
 env.pop("ANTHROPIC_MODEL", None)
 env.pop("CLAUDE_CODE_SUBAGENT_MODEL", None)
 
