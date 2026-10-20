@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "Shelf: File uploads and object storage: presigned, validated, cheap to serve."
+type: software
+authors:
+  - family-names: Parikh
+    given-names: Naman
+repository-code: "https://github.com/naman10parikh/shelf"
+license: MIT
+version: "0.1.0"
+abstract: "File uploads and object storage: presigned, validated, cheap to serve."
+keywords: ["agent-native", "object-storage", "file-uploads", "cloudflare-r2"]

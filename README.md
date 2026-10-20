@@ -1,7 +1,19 @@
 # shelf
 
 <!-- fleet:header:start -->
-[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE) [![Agent-native](https://img.shields.io/badge/agent--native-yes-2f5d8a?style=flat-square)](AGENTS.md) [![MCP server](https://img.shields.io/badge/MCP-server-1e3f60?style=flat-square)](#use-it-from-any-coding-agent) [![Skills](https://img.shields.io/badge/skills-5-2f6b4f?style=flat-square)](skills/)
+<p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg"><img alt="Shelf: File uploads and object storage: presigned, validated, cheap to serve." src="assets/banner.svg" width="100%"></picture></p>
+
+<p align="center">
+<a href="https://github.com/naman10parikh/shelf/releases"><img alt="Version" src="https://img.shields.io/badge/version-0.1.0-2f5d8a?style=flat-square"></a>
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square"></a>
+<a href="AGENTS.md"><img alt="Agent-native" src="https://img.shields.io/badge/agent--native-yes-2f5d8a?style=flat-square"></a>
+<a href="#use-it-from-any-coding-agent"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-1e3f60?style=flat-square"></a>
+<a href="skills/"><img alt="Skills" src="https://img.shields.io/badge/skills-5-2f6b4f?style=flat-square"></a>
+<a href="https://x.com/naman10parikh"><img alt="Follow on X" src="https://img.shields.io/badge/X-%40naman10parikh-000000?style=flat-square&amp;logo=x&amp;logoColor=white"></a>
+<a href="https://www.linkedin.com/in/naman-parikh1/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Naman%20Parikh-0a66c2?style=flat-square&amp;logo=linkedin&amp;logoColor=white"></a>
+</p>
+
+<p align="center"><a href="AGENTS.md">AGENTS.md</a> · <a href="llms.txt">llms.txt</a> · <a href="skills/">Skills</a> · <a href="https://github.com/naman10parikh/shelf/discussions">Discussions</a> · <a href="SECURITY.md">Security</a> · <a href="CONTRIBUTING.md">Contributing</a> · <a href="https://x.com/naman10parikh">X</a> · <a href="https://github.com/naman10parikh">All projects</a></p>
 
 **File uploads and object storage: presigned, validated, cheap to serve.**
 
@@ -9,7 +21,7 @@ Shelf is an agent employee, a packaged specialist agent with its own skills, mem
 
 _Shelf is part of an agent-native play for agent-native systems that can eventually be recursively self-improving and evolving, operated by agent employees._
 
-[AGENTS.md](AGENTS.md) · [llms.txt](llms.txt) · [Skills](skills/) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) · [All projects](https://github.com/naman10parikh)
+<p align="center"><img alt="Shelf on the command line" src="assets/terminal.svg" width="880"></p>
 <!-- fleet:header:end -->
 
 Shelf is the file side of an app, run as an agent: presigned uploads, signed-URL access control, magic-byte validation and lifecycle hygiene, with Cloudflare R2 by default and S3 as the portability contract. It is for coding agents, and the people who drive them, whenever an app accepts, stores or serves user files. Put it down, find it fast, pay for it once: a recursively self-improving, agent-native harness built on the Energy harness formula.
@@ -135,6 +147,10 @@ It carries its own evals and a self-improvement contract, [`dsip.json`](dsip.jso
 One of the projects by [Naman Parikh](https://github.com/naman10parikh). Each owns one part of an agent's harness, or of the product around an agent, and all of them follow one standard.
 
 Siblings: [agentdial](https://github.com/naman10parikh/agentdial) (identity) · [wikimem](https://github.com/naman10parikh/wikimem) (memory) · [skillsmith](https://github.com/naman10parikh/skillsmith) (skills) · [agent-booster](https://github.com/naman10parikh/agent-booster) (tools / CLIs) · [armory](https://github.com/naman10parikh/armory) (MCPs and the component registry) · [agentgrid](https://github.com/naman10parikh/agentgrid) (dispatch) · [agentswarm](https://github.com/naman10parikh/agentswarm) (dispatch) · [agentbench](https://github.com/naman10parikh/agentbench) (evals) · [agentmoney](https://github.com/naman10parikh/agentmoney) (observability) · [claude-harness](https://github.com/naman10parikh/claude-harness) (the whole harness, as a template).
+
+## Community
+
+Questions and ideas go to [Discussions](https://github.com/naman10parikh/shelf/discussions); bugs go to [issues](https://github.com/naman10parikh/shelf/issues/new/choose). Follow the work on [X](https://x.com/naman10parikh) and [LinkedIn](https://www.linkedin.com/in/naman-parikh1/).
 
 ## Contributing and security
 
