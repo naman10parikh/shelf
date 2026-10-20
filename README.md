@@ -5,7 +5,7 @@
 
 **File uploads and object storage: presigned, validated, cheap to serve.**
 
-Shelf is an agent employee, a packaged specialist agent with its own skills, memory and tests. It owns one job: storage and uploads. Coding agents use it through its skills, its MCP server and its command line. A scheduled job runs its evals and proposes fixes. A person makes every change.
+Shelf is an agent employee, a packaged specialist agent with its own skills, memory and tests. It owns one job: storage and uploads. Coding agents use it through its skills, its MCP server and its command line. Its evals gate every merge in CI. A person makes every change.
 
 _Shelf is part of an agent-native play for agent-native systems that can eventually be recursively self-improving and evolving, operated by agent employees._
 
@@ -128,7 +128,7 @@ Every project in this fleet is graded on the same 11 harness components and on s
 <!-- fleet:footer:start -->
 ## How it improves itself
 
-It carries its own evals and a self-improvement contract, [`dsip.json`](dsip.json), which says what it may change and how a change is judged. A scheduled job runs its evals and proposes fixes. A person makes every change. Lessons it learns are kept as rules in its memory files.
+It carries its own evals and a self-improvement contract, [`dsip.json`](dsip.json), which says what it may change and how a change is judged. Its evals gate every merge in CI. A person makes every change. Lessons it learns are kept as rules in its memory files.
 
 ## Part of a fleet
 
