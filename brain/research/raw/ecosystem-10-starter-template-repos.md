@@ -31,7 +31,7 @@ with honest "why / why not."
 2. **vercel/storage** — **590★, push 2026-06-15** (active, official). Monorepo for Vercel Blob / KV /
    Postgres SDKs with **upload examples** (client-upload + server-upload patterns, presigned-style via
    Vercel Blob). **Why:** clean, current, Next-native reference for the client-upload vs server-upload
-   fork. [removed]'s STACK.md already compared **R2 vs Vercel Blob** (per the internal checklist) — this
+   fork. a sibling project's STACK.md already compared **R2 vs Vercel Blob** (per the internal checklist) — this
    repo is the Blob side of that decision. **Why not:** Vercel Blob is its own (pricier, egress-billed)
    product, not S3/R2. Read it for the *patterns*, not as the storage choice. <https://github.com/vercel/storage>
 

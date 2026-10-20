@@ -217,7 +217,7 @@ summary: "The canonical tool roster for every storage job: default vs alternativ
 | Repo | Stars · push | Use as | Caveat |
 |---|---|---|---|
 | **uploadthing `examples/`** | (in 5,151★ repo) | Fastest working upload UI (Next/Expo/Svelte/Solid) | Couples to UploadThing's hosted plane (not R2-direct) |
-| **vercel/storage** | 590★ · 2026-06-15 | client-upload vs server-upload **patterns** (the [removed] R2-vs-Vercel-Blob comparison's Blob side) | Vercel Blob is its own pricier egress-billed product — read for patterns, not the storage choice |
+| **vercel/storage** | 590★ · 2026-06-15 | client-upload vs server-upload **patterns** (a sibling project's R2-vs-Vercel-Blob comparison's Blob side) | Vercel Blob is its own pricier egress-billed product — read for patterns, not the storage choice |
 | **anomalyco/sst** (was sst/sst) | 26,079★ · 2026-06-04 | IaC-first `Bucket` + presigned-upload + Lambda triggers (foundation for the AV pipeline) | AWS/CDK-centric; **org renamed** (ownership signal, [[OPINIONS]] O-26) |
 | **ministryofjustice/opg-s3-antivirus** | (UK gov, maintained) | Cleanest real-world S3 + ClamAV quarantine reference | AWS-specific (generalizability off-AWS unconfirmed) |
 | **transloadit/uppy** | 30,826★ · 2026-06-16 | The upload-UI reference itself | — |

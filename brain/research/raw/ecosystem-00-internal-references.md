@@ -20,7 +20,7 @@ fleet's canonical "what a complete harness needs" spec).
 > User-generated content, assets, exports.
 > **Default:** **Cloudflare R2** (no egress fees). Alts: **AWS S3**, **UploadThing** (DX upload
 > component on S3/R2), **Supabase Storage**, **Bunny** (CDN). **GAP.**
-> _Source: [removed] STACK.md (R2 vs Vercel Blob comparison)._
+> _Source: a sibling project STACK.md (R2 vs Vercel Blob comparison)._
 
 Also line 79 (component matrix): "**Object storage / CDN / file uploads** — Cloudflare R2 / AWS S3 /
 UploadThing / Supabase Storage — **GAP**". Line 398: "Product · C2 infra | Object storage/uploads |
@@ -28,7 +28,7 @@ UploadThing / Supabase Storage — **GAP**". Line 398: "Product · C2 infra | Ob
 
 **Implication for shelf:** the fleet has *no* storage employee today. shelf is meant to fill this
 GAP. The fleet's stated default is R2-first (egress economics), with S3 as the portable baseline and
-UploadThing as the DX layer. [removed]'s STACK.md already did an "R2 vs Vercel Blob" comparison —
+UploadThing as the DX layer. a sibling project's STACK.md already did an "R2 vs Vercel Blob" comparison —
 worth aligning shelf's recommendation to that prior decision.
 
 ## 2. Energy asset/screenshot handling conventions
