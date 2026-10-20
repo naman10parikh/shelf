@@ -19,6 +19,9 @@ permissions:
 jobs:
   rsi:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -39,5 +42,31 @@ jobs:
             exit 0
           fi
           echo "::group::node workflows/rsi.workflow.js --deterministic"
-          node workflows/rsi.workflow.js --deterministic
+          set -o pipefail
+          node workflows/rsi.workflow.js --deterministic | tee rsi-loop.log
           echo "::endgroup::"
+      - name: Write the proposal to a file (the loop prints it to the log)
+        if: always()
+        run: |
+          [ -f rsi-loop.log ] || exit 0
+          grep -E '^ +• PROPOSE ' rsi-loop.log | sed -E 's/^ +• /- /' > rsi-proposal.md || true
+          cat rsi-proposal.md
+      - name: Open or update the proposal issue for a person to review
+        if: always() && hashFiles('rsi-proposal.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          [ -s rsi-proposal.md ] || { echo "The loop proposed nothing this run, so no issue."; exit 0; }
+          gh label create proposal --color 2f5d8a --description "A change the self-improvement loop proposes for a person to review" --force
+          {
+            echo "Written by the scheduled self-improvement loop on $(date -u '+%Y-%m-%d %H:%M UTC'). It proposes; a person decides. The loop never merges."
+            echo
+            cat rsi-proposal.md
+          } > "$RUNNER_TEMP/proposal-issue.md"
+          number=$(gh issue list --label proposal --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --body-file "$RUNNER_TEMP/proposal-issue.md"
+          else
+            gh issue create --title "Shelf: proposal from the self-improvement loop" --label proposal --body-file "$RUNNER_TEMP/proposal-issue.md"
+          fi
