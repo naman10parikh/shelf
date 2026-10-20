@@ -278,7 +278,7 @@ async function main(): Promise<void> {
     const http = createServer((req, res) => {
       void transport.handleRequest(req, res);
     });
-    http.listen(port, () => {
+    http.listen(port, "127.0.0.1", () => {
       process.stderr.write(`shelf MCP (Streamable-HTTP) listening on http://127.0.0.1:${port}/mcp  trace=${newTraceId()}\n`);
     });
     return;
