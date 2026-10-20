@@ -1,6 +1,6 @@
 # shelf — Bootstrap Memory
 
-> The ≤2,000-token bootstrap the MCP memory server loads (`.mcp.json` → `./memory/MEMORY.md`). The
+> The ≤2,000-token bootstrap the MCP memory server loads (`.mcp.dev.json` → `./memory/MEMORY.md`). The
 > *queryable* expertise is the six `brain/` artifacts, searched via `shelf brain <query>`. This file is
 > the always-loaded index: the default stack, the creed, the boundaries, and pointers into the brain.
 

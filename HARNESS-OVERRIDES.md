@@ -99,7 +99,8 @@
   keys); a documented dual-mode (stdio local + Streamable-HTTP hosted path, MCP spec 2025-11-25).
 - **🟡 (NOT enough):** only the 4 inherited servers; the consumed Cloudflare MCP *without* shelf's own server; a
   server entry that doesn't start.
-- *Evidence:* `.mcp.json` has the `shelf` server (no literal keys) + the cloudflare entry; an MCP `tools/list`
+- *Evidence:* `.mcp.json` has the `shelf` server (no literal keys; the cloudflare entry moved to `.mcp.dev.json`
+  in CP158 because it needs a token); an MCP `tools/list`
   JSON-RPC call returns the documented names; `tools/call presign_upload` round-trips. (Note V-12: the R2 MCP's own
   presign-generation is unconfirmed — shelf's `presign_upload` uses AWS-SDK-v3, so the bar never depends on it.)
 

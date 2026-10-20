@@ -1,0 +1,13 @@
+{
+  "description": "shelf's footgun gate: blocks object ACLs, user filenames in object keys, new Map() upload state and presigned PUT used as a size bound.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/block-storage-footguns.js\"" }
+        ]
+      }
+    ]
+  }
+}

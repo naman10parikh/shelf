@@ -2,6 +2,7 @@
   "schemaVersion": "0.1",
   "name": "shelf",
   "description": "The Energy fleet's object-storage / file-handling / CDN / uploads employee — mints presigned upload URLs (POST policy, size+type bounded), round-trips files to Cloudflare R2 / S3 with signed-URL access control, validates uploads by magic bytes (not header trust), sets the abort-incomplete-multipart lifecycle rule day-one, and estimates cost egress-first. Defaults to R2 (zero egress) with S3 as the portability contract; picks the backend per-workload. Refuses SVG-from-untrusted, object ACLs, and sizing bills from GB stored. Object storage only — DB blobs are acorn's. Powered by Energy.",
+  "url": "https://github.com/naman10parikh/shelf",
   "version": "0.1.0",
   "provider": { "organization": "Energy", "url": "https://github.com/naman10parikh/shelf" },
   "endpoint": "stdio://shelf-mcp",
@@ -28,7 +29,7 @@
   ],
   "capabilityNotes": {
     "delivered": "Every command in `capabilities` produces real, $0/offline output today (verified by B2/B3 + E1). migrate/scan/serve-config landed in cluster B3 (the Wave-P PLAN provisionally listed them as planned; they are now delivered, so the card states the truth rather than under-claiming).",
-    "planned": "`cors` performs a real OPTIONS preflight and therefore needs a resolved backend (S3_ENDPOINT or R2_*); `signed-url-round-trip-live` is the end-to-end GET-without-URL→403 / with→200 / TTL-expiry assertion that runs only against live R2/S3 in an E2B sandbox (Form 2, R2-creds-gated → CHAIRMAN-CHECKLIST). The $0 MinIO merge gate (Form 1) proves the round-trip + size/type/magic-byte rejection without these."
+    "planned": "`cors` performs a real OPTIONS preflight and therefore needs a resolved backend (S3_ENDPOINT or R2_*); `signed-url-round-trip-live` is the end-to-end GET-without-URL→403 / with→200 / TTL-expiry assertion that runs only against live R2/S3 in an E2B sandbox (Form 2; it needs R2 storage keys that only the maintainer holds). The $0 MinIO merge gate (Form 1) proves the round-trip + size/type/magic-byte rejection without these."
   },
   "skills": [
     {

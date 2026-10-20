@@ -1,0 +1,17 @@
+{
+  "name": "shelf",
+  "version": "0.1.0",
+  "description": "File uploads and object storage: presigned, validated, cheap to serve.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "shelf": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "-p",
+        "github:naman10parikh/shelf",
+        "shelf-mcp"
+      ]
+    }
+  }
+}

@@ -1,9 +1,10 @@
 # AGENTS.md — shelf (object storage / file handling / CDN / uploads employee)
 
 > How a coding agent operates **shelf**. shelf is the Energy fleet's object-storage employee — a
-> **tool-employee** consumed by agents (Claude Code, the energy hub, sibling employees) and the chairman's
-> local cockpit, through a **CLI + MCP**. Full persona: `identity/SOUL.md`. Durable expertise: `brain/`
-> (six artifacts). Bootstrap: `memory/MEMORY.md`. Operating rules: `CLAUDE.md`.
+> **tool-employee** consumed by agents (Claude Code, Codex, Cursor, Gemini CLI, sibling employees) and its own
+> local cockpit, through a **CLI + MCP**. This file is the one set of instructions for every coding agent.
+> Full persona: `identity/SOUL.md`. Durable expertise: `brain/` (six artifacts). Bootstrap: `memory/MEMORY.md`.
+> Claude Code specifics: `CLAUDE.md`.
 
 ## What shelf is
 
@@ -12,6 +13,22 @@ per workload, mints presigned upload URLs, validates uploads by magic bytes (not
 private files without leaking them, sets lifecycle hygiene day one, optimizes + delivers images, gets the
 CDN cache strategy right, and migrates between providers without a surprise bill — all **as an agent**, via
 CLIs/SDKs/MCP, never a web dashboard. "It's just `putObject`" is a warning sign, not a description.
+
+## Voice
+
+A senior storage/platform engineer paged at 2am by a viral-file egress bill and a stored-XSS CVE in the
+same week. Opinionated, defense-in-depth, allergic to anyone who calls file upload trivial.
+
+## What it is made of (harness components)
+
+`identity/` (SOUL/BRAND/HEARTBEAT/MEMORY — the self) · `memory/MEMORY.md` + `brain/` (the queryable
+expertise: six artifacts, searched via `shelf brain`) · the `shelf` CLI (the hands; AWS-SDK-v3
+presign + rclone + the validation pipeline) · `skills/` (five skills, each encoding an OPINION/PITFALL) ·
+`hooks/` (the dogfood footgun-blocker) · `.claude/agents` (`upload-security-auditor`, `storage-cost-auditor`) ·
+`src/mcp/server.ts` (shelf's OWN MCP server) · `src/dispatch` (the ordered upload flow) · `eval/` (the Hamel
+L1/L2/L3 pyramid + the acceptance test) · `workflows/rsi.workflow.js` (the scheduled improvement loop) ·
+`sandbox/` (the E2B boot). shelf is NOT a web, auth or database product: it ships no auth, frontend or
+database module (those are badge, pixel and acorn). It owns the bytes and the pointer pattern.
 
 ## The creed (the shape every correct answer takes)
 
@@ -51,9 +68,15 @@ output. Every command traces to a brain node.
 shelf ships its own MCP server (not the inherited template, not merely consuming the R2 MCP) exposing:
 `presign_upload` · `presign_get` · `validate_file` · `set_lifecycle` · `find_orphans` · `estimate_cost` ·
 `pick_backend` · `explain_pitfall` · `search_brain`. It also *consumes* the official Cloudflare R2 MCP
-(`cloudflare/mcp-server-cloudflare`) as a lens on the R2 default (env-refs only, no literal keys). shelf's
-own `presign_upload` uses the AWS-SDK-v3 presigner (`region:"auto"` + the R2 endpoint), so the upload bar
-never depends on the R2 MCP minting URLs.
+(`cloudflare/mcp-server-cloudflare`) as a lens on the R2 default (env-refs only, no literal keys; it lives in
+`.mcp.dev.json` because it needs a token). shelf's own `presign_upload` uses the AWS-SDK-v3 presigner
+(`region:"auto"` + the R2 endpoint), so the upload bar never depends on the R2 MCP minting URLs.
+
+Start it over stdio, straight from GitHub, in any MCP client:
+`npx -y -p github:naman10parikh/shelf shelf-mcp`. The root `.mcp.json` does exactly this. The command line works
+the same way: `npx -y -p github:naman10parikh/shelf shelf --help`. Most tools run offline at no cost; the live
+round-trip tools read `S3_ENDPOINT` (any S3-compatible target, MinIO included) or `R2_ACCOUNT_ID`,
+`R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` from the environment.
 
 ## Default stack
 
@@ -110,6 +133,19 @@ Six Wave-R artifacts in `brain/`. Node-ID prefixes: `JTBD-*` jobs · `S*` scenar
 - `brain/OPINIONS.md` — the taste layer (`O-01..O-28`): stance → why → source.
 - `brain/GAPS-AND-DISPUTES.md` — open debates + the drift-watch list.
 - `brain/TOOL-MATRIX.md` — default-vs-alt tool roster + the `V-*` drift entries + §9 secrets.
+
+## Develop and test
+
+```bash
+pnpm install && pnpm build      # compiles src/ to dist/ (dist/ is not committed; `prepare` builds it on a git install)
+pnpm test                       # vitest: structural checks, the dispatch order, the acceptance rejects
+pnpm eval                       # the eval pyramid: L1 structural, L2 14 golden tasks (pass^3), L3 calibrated judge
+pnpm rsi                        # the deterministic improvement loop: drift-watch, evals, a proposal (never a commit)
+S3_ENDPOINT=http://localhost:9000 pnpm test:acceptance   # the full round-trip against a local MinIO
+```
+
+CI runs the tests and the eval pyramid on every push, plus the MinIO round-trip as the merge gate. A change that
+lowers an eval score does not merge. Lessons become rules in `memory/LEARNINGS.md`.
 
 ## Commit convention
 

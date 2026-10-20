@@ -1,0 +1,17 @@
+{
+  "name": "shelf",
+  "owner": {
+    "name": "Naman Parikh",
+    "url": "https://github.com/naman10parikh"
+  },
+  "metadata": {
+    "description": "File uploads and object storage: presigned, validated, cheap to serve."
+  },
+  "plugins": [
+    {
+      "name": "shelf",
+      "source": "./",
+      "description": "File uploads and object storage: presigned, validated, cheap to serve."
+    }
+  ]
+}
