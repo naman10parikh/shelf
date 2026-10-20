@@ -4,16 +4,15 @@
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg"><img alt="Shelf: File uploads and object storage: presigned, validated, cheap to serve." src="assets/banner.svg" width="100%"></picture></p>
 
 <p align="center">
+<a href="https://github.com/naman10parikh/shelf/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/naman10parikh/shelf/actions/workflows/ci.yml/badge.svg"></a>
 <a href="https://github.com/naman10parikh/shelf/releases"><img alt="Version" src="https://img.shields.io/badge/version-0.1.0-2f5d8a?style=flat-square"></a>
-<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=flat-square"></a>
-<a href="AGENTS.md"><img alt="Agent-native" src="https://img.shields.io/badge/agent--native-yes-2f5d8a?style=flat-square"></a>
+<a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-2f5d8a?style=flat-square"></a>
 <a href="#use-it-from-any-coding-agent"><img alt="MCP server" src="https://img.shields.io/badge/MCP-server-1e3f60?style=flat-square"></a>
-<a href="skills/"><img alt="Skills" src="https://img.shields.io/badge/skills-5-2f6b4f?style=flat-square"></a>
-<a href="https://x.com/naman10parikh"><img alt="Follow on X" src="https://img.shields.io/badge/X-%40naman10parikh-000000?style=flat-square&amp;logo=x&amp;logoColor=white"></a>
-<a href="https://www.linkedin.com/in/naman-parikh1/"><img alt="LinkedIn" src="https://img.shields.io/badge/LinkedIn-Naman%20Parikh-0a66c2?style=flat-square&amp;logo=linkedin&amp;logoColor=white"></a>
+<a href="https://x.com/naman10parikh"><img alt="Follow @naman10parikh on X" src="https://img.shields.io/badge/follow-%40naman10parikh-000000?style=flat-square&amp;logo=x&amp;logoColor=white"></a>
+<a href="https://www.linkedin.com/in/naman-parikh1/"><img alt="Naman Parikh on LinkedIn" src="https://img.shields.io/badge/LinkedIn-Naman%20Parikh-0a66c2?style=flat-square"></a>
 </p>
 
-<p align="center"><a href="AGENTS.md">AGENTS.md</a> · <a href="llms.txt">llms.txt</a> · <a href="skills/">Skills</a> · <a href="https://github.com/naman10parikh/shelf/discussions">Discussions</a> · <a href="SECURITY.md">Security</a> · <a href="CONTRIBUTING.md">Contributing</a> · <a href="https://x.com/naman10parikh">X</a> · <a href="https://github.com/naman10parikh">All projects</a></p>
+<p align="center"><a href="#quick-start">Quick start</a> · <a href="docs/README.md">How it works</a> · <a href="AGENTS.md">AGENTS.md</a> · <a href="llms.txt">llms.txt</a> · <a href="skills/">Skills</a> · <a href="https://github.com/naman10parikh/shelf/discussions">Discussions</a> · <a href="https://github.com/naman10parikh">All projects</a></p>
 
 **File uploads and object storage: presigned, validated, cheap to serve.**
 
@@ -129,7 +128,7 @@ Every project in this fleet is graded on the same 11 harness components and on s
 | Sub-agents | ✅ | .claude/agents/upload-security-auditor.md:2 .claude/agents/storage-cost-auditor.md:2 |
 | MCPs | ✅ | src/mcp/server.ts:1 package.json:8 .mcp.json:3 |
 | Dispatch | ✅ | src/dispatch/upload-flow.ts:35 .github/workflows/rsi.yml:13 |
-| Evals | ✅ | eval/run.mjs:1 .github/workflows/acceptance.yml:73 |
+| Evals | ✅ | eval/run.mjs:1 .github/workflows/acceptance.yml:75 |
 | Observability | ✅ | src/lib/observability.ts:3 |
 | Sandbox/Infra | 🟡 | sandbox/boot.mjs:1 eval/acceptance/form2-e2b.mjs:17 (E2B boot passes; the live R2 round-trip needs storage keys only the founder holds) |
 | Self-improvement | ✅ | dsip.json:1 workflows/rsi.workflow.js:1 .github/workflows/rsi.yml:13 |
@@ -146,7 +145,18 @@ It carries its own evals and a self-improvement contract, [`dsip.json`](dsip.jso
 
 One of the projects by [Naman Parikh](https://github.com/naman10parikh). Each owns one part of an agent's harness, or of the product around an agent, and all of them follow one standard.
 
-Siblings: [agentdial](https://github.com/naman10parikh/agentdial) (identity) · [wikimem](https://github.com/naman10parikh/wikimem) (memory) · [skillsmith](https://github.com/naman10parikh/skillsmith) (skills) · [agent-booster](https://github.com/naman10parikh/agent-booster) (tools / CLIs) · [armory](https://github.com/naman10parikh/armory) (MCPs and the component registry) · [agentgrid](https://github.com/naman10parikh/agentgrid) (dispatch) · [agentswarm](https://github.com/naman10parikh/agentswarm) (dispatch) · [agentbench](https://github.com/naman10parikh/agentbench) (evals) · [agentmoney](https://github.com/naman10parikh/agentmoney) (observability) · [claude-harness](https://github.com/naman10parikh/claude-harness) (the whole harness, as a template).
+| Related project | What it owns |
+| --- | --- |
+| [AgentDial](https://github.com/naman10parikh/agentdial) | Identity |
+| [WikiMem](https://github.com/naman10parikh/wikimem) | Memory |
+| [Skillsmith](https://github.com/naman10parikh/skillsmith) | Skills |
+| [Agent Booster](https://github.com/naman10parikh/agent-booster) | Tools / CLIs |
+| [Armory](https://github.com/naman10parikh/armory) | MCPs and the component registry |
+| [AgentGrid](https://github.com/naman10parikh/agentgrid) | Dispatch |
+| [AgentSwarm](https://github.com/naman10parikh/agentswarm) | Dispatch |
+| [AgentBench](https://github.com/naman10parikh/agentbench) | Evals |
+| [AgentMoney](https://github.com/naman10parikh/agentmoney) | Observability |
+| [Claude Harness](https://github.com/naman10parikh/claude-harness) | The whole harness, as a template |
 
 ## Community
 
