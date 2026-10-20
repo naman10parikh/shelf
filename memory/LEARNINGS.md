@@ -32,3 +32,12 @@ Every error → root cause → rule. Auto-compressed when >500 lines (memory-com
   sessions on an old model.
 - **Root cause:** the script set `ANTHROPIC_MODEL` instead of leaving the choice to Claude Code.
 - **Rule:** never write a model ID into a setting, flag or script; Claude Code's default model upgrades itself.
+
+## 2026-10-19 · An npx bin is a symlink
+
+- **What broke:** `npx -y -p github:naman10parikh/shelf shelf-mcp` exited at once with no output, so the plugin and
+  every MCP client got no server.
+- **Root cause:** the "run only when invoked directly" guard matched `process.argv[1]` against `server.js`, but npx
+  starts the bin through the `node_modules/.bin/shelf-mcp` symlink.
+- **Rule:** resolve `argv[1]` with `realpathSync` before any main-module check, and prove every bin through npx from
+  GitHub, not only with `node dist/...`.

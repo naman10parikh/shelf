@@ -21,6 +21,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 import {
@@ -288,8 +289,16 @@ async function main(): Promise<void> {
   process.stderr.write("shelf MCP (stdio) ready\n");
 }
 
-// Run only when invoked directly (not when imported by a test harness).
-const invokedDirectly = process.argv[1] && /server\.(js|ts)$/.test(process.argv[1]);
+// Run only when invoked directly (not when imported by a test harness). The `shelf-mcp` bin that npx and
+// the plugin start is a symlink in node_modules/.bin, so resolve it before matching the file name.
+function entryPath(): string {
+  try {
+    return process.argv[1] ? realpathSync(process.argv[1]) : "";
+  } catch {
+    return process.argv[1] ?? ""; // Intentionally silent: an unresolvable argv[1] falls back to the raw path.
+  }
+}
+const invokedDirectly = /server\.(js|ts)$/.test(entryPath());
 if (invokedDirectly) {
   main().catch((e: unknown) => {
     process.stderr.write(`shelf MCP failed to start: ${e instanceof Error ? e.message : String(e)}\n`);
