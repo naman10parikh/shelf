@@ -65,7 +65,7 @@ function logRow(row) {
       JSON.stringify({
         ts: new Date().toISOString(),
         verb: "sandbox-boot",
-        model: process.env.ANTHROPIC_MODEL || "claude-opus-4-8[1m]",
+        model: process.env.ANTHROPIC_MODEL || "default",
         ...row,
       }) + "\n",
     );

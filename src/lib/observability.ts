@@ -127,7 +127,7 @@ function writeEvent(e: {
     ok: e.ok,
     durationMs: e.durationMs,
     toolCalls: e.toolCalls,
-    model: process.env.ANTHROPIC_MODEL ?? "claude-opus-4-8[1m]",
+    model: process.env.ANTHROPIC_MODEL ?? "default",
     ...(e.audit ? { audit: e.audit } : {}),
     ...(e.error ? { error: e.error } : {}),
   };
