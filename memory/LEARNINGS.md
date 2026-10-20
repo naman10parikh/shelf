@@ -41,3 +41,12 @@ Every error → root cause → rule. Auto-compressed when >500 lines (memory-com
   starts the bin through the `node_modules/.bin/shelf-mcp` symlink.
 - **Rule:** resolve `argv[1]` with `realpathSync` before any main-module check, and prove every bin through npx from
   GitHub, not only with `node dist/...`.
+
+## 2026-10-20 · Pin the third-party image a gate depends on
+
+- **What broke:** every acceptance run since 20 October failed at "Start MinIO": `pull access denied for
+  minio/minio, repository does not exist`. The last green run was on 1 July.
+- **Root cause:** the workflow pulled the unpinned upstream `minio/minio` image, which is no longer on Docker Hub;
+  `quay.io/minio/minio` refuses anonymous pulls.
+- **Rule:** pin the image a gate pulls to a tag that still exists (`bitnamilegacy/minio:2025.7.23-debian-12-r5`),
+  say in the workflow why it is pinned, and read the push's CI result before calling a change done.

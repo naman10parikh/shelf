@@ -9,9 +9,12 @@ name: acceptance
 # `acceptance-live` job below — it proves the Sandbox component ✅ but never blocks the merge (absent
 # R2_*/E2B_API_KEY it skips honestly → Sandbox component 🟡). See CHAIRMAN-CHECKLIST.
 #
-# Convention note: MinIO's official image needs the `server /data` subcommand, which a GitHub Actions
-# `services:` block cannot pass to the image — so MinIO is started as a STEP via `docker run -d` + a
-# health poll (the exact path verified locally). The acceptance body is identical to `pnpm test:acceptance`.
+# Convention note: MinIO is started as a STEP via `docker run -d` + a health poll, and the image is pinned.
+# The upstream `minio/minio` image is gone from Docker Hub (404 when checked on 20 October 2026) and `quay.io/minio/minio`
+# refuses anonymous pulls (401), so the gate pins `bitnamilegacy/minio:2025.7.23-debian-12-r5`, the last tag of
+# a repository frozen in August 2025: the same MinIO server, $0, no account. It reads MINIO_ROOT_USER and
+# MINIO_ROOT_PASSWORD and serves S3 on 9000 with no extra arguments. The acceptance body is identical to
+# `pnpm test:acceptance`.
 
 # push/PR run the merge gate (Form 1); workflow_dispatch additionally enables the live Form-2 job below.
 on:
@@ -38,15 +41,16 @@ jobs:
 
       - name: Start MinIO (ephemeral, $0, no account — the local-first merge gate, D15)
         run: |
+          # Pinned (see the convention note at the top): minio/minio no longer exists on Docker Hub.
           docker run -d --name shelf-minio -p 9000:9000 \
             -e MINIO_ROOT_USER=minioadmin -e MINIO_ROOT_PASSWORD=minioadmin \
-            minio/minio server /data
+            bitnamilegacy/minio:2025.7.23-debian-12-r5
           # Poll the health endpoint until MinIO is live (no foreground sleep).
-          for i in $(seq 1 30); do
+          for i in $(seq 1 60); do
             if curl -sf http://localhost:9000/minio/health/live >/dev/null 2>&1; then
               echo "MinIO healthy after ${i}s"; break
             fi
-            if [ "$i" = "30" ]; then echo "MinIO did not become healthy"; docker logs shelf-minio; exit 1; fi
+            if [ "$i" = "60" ]; then echo "MinIO did not become healthy"; docker logs shelf-minio; exit 1; fi
             sleep 1
           done
 
