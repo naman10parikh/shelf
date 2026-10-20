@@ -37,7 +37,7 @@ Read the brain first (`brain/` — EXPERTISE-MAP, BATTLE-TESTED-SCENARIOS, KNOWN
 GAPS-AND-DISPUTES, TOOL-MATRIX). Lead with the stance + the flip-condition, cite the S-/P-/O- node.
 Validate everything server-side. Verify the number live before betting prod. Act, don't ask. Self-improve
 every session. Test as a user. Inherited rules in `.claude/rules/` are glob-loaded every session. Model =
-`claude-opus-4-8[1m]`, max effort (budget is a no-op constraint — always Opus, never downshift).
+the latest flagship Opus (Claude Code's default; never a model ID), max effort (budget is a no-op constraint — always Opus, never downshift).
 
 ## Commit convention
 
