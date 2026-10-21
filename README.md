@@ -20,7 +20,7 @@ Shelf is an agent employee, a packaged specialist agent with its own skills, mem
 
 _Shelf is part of an agent-native play for agent-native systems that can eventually be recursively self-improving and evolving, operated by agent employees._
 
-<p align="center"><img alt="Shelf: on the command line" src="assets/terminal.svg" width="880"></p>
+<p align="center"><img alt="Shelf: a real task, run offline" src="assets/demo.svg" width="880"></p>
 <!-- fleet:header:end -->
 
 Shelf is the file side of an app, run as an agent: presigned uploads, signed-URL access control, magic-byte validation and lifecycle hygiene, with Cloudflare R2 by default and S3 as the portability contract. It is for coding agents, and the people who drive them, whenever an app accepts, stores or serves user files. Put it down, find it fast, pay for it once: a recursively self-improving, agent-native harness built on the Energy harness formula.
